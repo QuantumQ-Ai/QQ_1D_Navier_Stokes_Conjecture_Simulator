@@ -1,5 +1,3 @@
-// 1D_NavierStokesSimulator_v19
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1671,7 +1669,7 @@
                 }
                 else {
                     const presetText = this.currentPresetName.toUpperCase();
-                    subtitleSpan.innerHTML = `<span class="text-green-600-custom">${presetText}</span>`;
+                    subtitleSpan.innerHTML = `<span class="text-green-600-custom">ACTIVE (${presetText})</span>`;
                 }
             }
 
@@ -2023,7 +2021,7 @@
                     return;
                 }
 
-                const genAI = new GoogleGenerativeAI(currentApiKey);
+                const genAI = new GoogleGenerativeAI(currentApiKey); // Use the user-provided API key
                 const geminiModel = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
                 const prompt = `
@@ -2064,20 +2062,21 @@
                             }
                         }
                     };
-                    const apiKey = ""; // Canvas will inject the API key
-                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                    // Use the currentApiKey directly in the URL
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${currentApiKey}`;
                     const response = await fetch(apiUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
                     });
                     const result = await response.json();
+                    console.log("Raw Gemini API response:", result); // Log the full API response
 
                     if (result.candidates && result.candidates.length > 0 &&
                         result.candidates[0].content && result.candidates[0].content.parts &&
                         result.candidates[0].content.parts.length > 0) {
                         const jsonText = result.candidates[0].content.parts[0].text;
-                        console.log("Raw JSON response from Gemini API:", jsonText); // Log raw JSON for debugging
+                        console.log("Parsed JSON text from Gemini API:", jsonText); // Log raw JSON for debugging
 
                         let qaPairs;
                         try {
@@ -2105,7 +2104,17 @@
                         this.elements.aiProgressMessage.textContent = "Completed.";
 
                     } else {
-                        this.elements.aiInterpretationContent.innerHTML = `<p class="text-red-600">Failed to generate Q&A. Response structure unexpected or empty.</p>`;
+                        let errorMessage = "Failed to generate Q&A. Response structure unexpected or empty.";
+                        if (result.candidates && result.candidates.length === 0) {
+                            errorMessage += " No candidates found in response.";
+                        } else if (result.candidates && result.candidates[0] && !result.candidates[0].content) {
+                            errorMessage += " Candidate content missing.";
+                        } else if (result.candidates && result.candidates[0] && result.candidates[0].content && !result.candidates[0].content.parts) {
+                            errorMessage += " Candidate content parts missing.";
+                        } else if (result.candidates && result.candidates[0] && result.candidates[0].content && result.candidates[0].content.parts && result.candidates[0].content.parts.length === 0) {
+                            errorMessage += " Candidate content parts empty.";
+                        }
+                        this.elements.aiInterpretationContent.innerHTML = `<p class="text-red-600">${errorMessage}</p>`;
                         this.elements.aiProgressMessage.textContent = "Empty/Unexpected Response.";
                     }
                 } catch (error) {
