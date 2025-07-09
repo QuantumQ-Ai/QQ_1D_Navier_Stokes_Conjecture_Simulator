@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>1D Fluid Dynamics Analogue Simulator v21</title>
+    <title>1D Fluid Dynamics Analogue Simulator v23</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js CDN for plotting -->
@@ -268,40 +268,59 @@
 
         <div class="flex flex-col lg:flex-row gap-6">
             <!-- Left Panel: Parameters and Controls -->
-            <div class="lg:w-2/5 bg-gray-50 p-6 rounded-lg border border-gray-200 shadow-sm" id="parameterSection">
+            <div class="lg:w-2/5 bg-gray-50 p-6 rounded-lg border border-gray-200 shadow-md" id="parameterSection">
                 <h2 class="text-2xl font-bold text-gray-700 mb-6">Simulation Parameters</h2>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-y-5 gap-x-4 mb-8">
-                    <div class="flex flex-col">
-                        <label for="paramL" class="text-sm font-medium text-gray-600 mb-1" data-tooltip-content="The total spatial extent of the 1D domain for the simulation.">System Length (L):</label>
-                        <input type="range" id="paramL" min="1" max="50" step="1" value="10" class="w-full h-2 bg-indigo-100 rounded-lg appearance-none cursor-pointer">
-                        <span id="valueL" class="text-xs text-gray-500 mt-1 text-right">10.0</span>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-4 mb-8">
+                    <!-- System Length -->
+                    <div>
+                        <label for="paramL" class="block text-sm font-medium text-gray-600" data-tooltip-content="The total spatial extent of the 1D domain for the simulation.">System Length (L):</label>
+                        <div class="flex items-center gap-x-3 mt-1">
+                            <input type="range" id="paramL" min="1" max="50" step="1" value="10" class="w-full">
+                            <input type="number" id="inputL" min="1" max="50" step="1" value="10" class="w-20 p-1 border border-gray-300 rounded-md shadow-sm text-sm text-center">
+                        </div>
                     </div>
-                    <div class="flex flex-col">
-                        <label for="paramN" class="text-sm font-medium text-gray-600 mb-1" data-tooltip-content="The number of discrete points used to represent the spatial domain. Higher N means higher spatial resolution.">Grid Points (N):</label>
-                        <input type="range" id="paramN" min="32" max="1024" step="32" value="256" class="w-full h-2 bg-indigo-100 rounded-lg appearance-none cursor-pointer">
-                        <span id="valueN" class="text-xs text-gray-500 mt-1 text-right">256</span>
+                    <!-- Grid Points -->
+                    <div>
+                        <label for="paramN" class="block text-sm font-medium text-gray-600" data-tooltip-content="The number of discrete points used to represent the spatial domain. Higher N means higher spatial resolution.">Grid Points (N):</label>
+                        <div class="flex items-center gap-x-3 mt-1">
+                            <input type="range" id="paramN" min="32" max="1024" step="32" value="256" class="w-full">
+                            <input type="number" id="inputN" min="32" max="1024" step="32" value="256" class="w-20 p-1 border border-gray-300 rounded-md shadow-sm text-sm text-center">
+                        </div>
                     </div>
-                    <div class="flex flex-col">
-                        <label for="paramT" class="text-sm font-medium text-gray-600 mb-1" data-tooltip-content="The total duration for which the simulation will run.">Total Time (T):</label>
-                        <input type="range" id="paramT" min="0.1" max="50" step="0.5" value="5" class="w-full h-2 bg-indigo-100 rounded-lg appearance-none cursor-pointer">
-                        <span id="valueT" class="text-xs text-gray-500 mt-1 text-right">5.0</span>
+                    <!-- Total Time -->
+                    <div>
+                        <label for="paramT" class="block text-sm font-medium text-gray-600" data-tooltip-content="The total duration for which the simulation will run.">Total Time (T):</label>
+                        <div class="flex items-center gap-x-3 mt-1">
+                            <input type="range" id="paramT" min="0.1" max="50" step="0.5" value="5" class="w-full">
+                            <input type="number" id="inputT" min="0.1" max="50" step="0.5" value="5.0" class="w-20 p-1 border border-gray-300 rounded-md shadow-sm text-sm text-center">
+                        </div>
                     </div>
-                    <div class="flex flex-col">
-                        <label for="paramAlpha" class="text-sm font-medium text-gray-600 mb-1" data-tooltip-content="The diffusion coefficient ($\nu_{eff}$) controls how quickly the quantity $u$ spreads out from regions of high concentration to low concentration. Higher $\nu_{eff}$ leads to faster smoothing. This parameter is analogous to viscosity in fluid dynamics.">Diff. Coefficient ($\nu_{eff}$):</label>
-                        <input type="range" id="paramAlpha" min="0.01" max="1" step="0.01" value="0.1" class="w-full h-2 bg-indigo-100 rounded-lg appearance-none cursor-pointer">
-                        <span id="valueAlpha" class="text-xs text-gray-500 mt-1 text-right">0.10</span>
+                    <!-- Diffusion Coefficient -->
+                    <div>
+                        <label for="paramAlpha" class="block text-sm font-medium text-gray-600" data-tooltip-content="The diffusion coefficient ($\nu_{eff}$) controls how quickly the quantity $u$ spreads out from regions of high concentration to low concentration. Higher $\nu_{eff}$ leads to faster smoothing. This parameter is analogous to viscosity in fluid dynamics.">Diff. Coefficient ($\nu_{eff}$):</label>
+                        <div class="flex items-center gap-x-3 mt-1">
+                            <input type="range" id="paramAlpha" min="0.01" max="1" step="0.01" value="0.1" class="w-full">
+                            <input type="number" id="inputAlpha" min="0.01" max="1" step="0.01" value="0.10" class="w-20 p-1 border border-gray-300 rounded-md shadow-sm text-sm text-center">
+                        </div>
                     </div>
-                    <div class="flex flex-col">
-                        <label for="paramBeta" class="text-sm font-medium text-gray-600 mb-1" data-tooltip-content="The non-linear growth parameter ($\beta_{NL}$) influences the local growth or decay of $u$. The $u(1-u)$ term is common in logistic growth models, where growth is limited as $u$ approaches 1. This parameter represents the non-linear reaction term, conceptually similar to non-linear advection in fluid dynamics.">Non-linear Growth ($\beta_{NL}$):</label>
-                        <input type="range" id="paramBeta" min="0" max="2" step="0.05" value="0.5" class="w-full h-2 bg-indigo-100 rounded-lg appearance-none cursor-pointer">
-                        <span id="valueBeta" class="text-xs text-gray-500 mt-1 text-right">0.50</span>
+                    <!-- Non-linear Growth -->
+                    <div>
+                        <label for="paramBeta" class="block text-sm font-medium text-gray-600" data-tooltip-content="The non-linear growth parameter ($\beta_{NL}$) influences the local growth or decay of $u$. The $u(1-u)$ term is common in logistic growth models, where growth is limited as $u$ approaches 1. This parameter represents the non-linear reaction term, conceptually similar to non-linear advection in fluid dynamics.">Non-linear Growth ($\beta_{NL}$):</label>
+                        <div class="flex items-center gap-x-3 mt-1">
+                            <input type="range" id="paramBeta" min="0" max="2" step="0.05" value="0.5" class="w-full">
+                            <input type="number" id="inputBeta" min="0" max="2" step="0.05" value="0.50" class="w-20 p-1 border border-gray-300 rounded-md shadow-sm text-sm text-center">
+                        </div>
                     </div>
-                    <div class="flex flex-col">
-                        <label for="paramGamma" class="text-sm font-medium text-gray-600 mb-1" data-tooltip-content="The cubic damping parameter ($\gamma_{diss}$) further limits the growth of $u$, especially at higher values. It can stabilize solutions or lead to different pattern formations. This parameter represents a form of dissipation or energy removal.">Cubic Damping ($\gamma_{diss}$):</label>
-                        <input type="range" id="paramGamma" min="0" max="1" step="0.01" value="0.2" class="w-full h-2 bg-indigo-100 rounded-lg appearance-none cursor-pointer">
-                        <span id="valueGamma" class="text-xs text-gray-500 mt-1 text-right">0.20</span>
+                    <!-- Cubic Damping -->
+                    <div>
+                        <label for="paramGamma" class="block text-sm font-medium text-gray-600" data-tooltip-content="The cubic damping parameter ($\gamma_{diss}$) further limits the growth of $u$, especially at higher values. It can stabilize solutions or lead to different pattern formations. This parameter represents a form of dissipation or energy removal.">Cubic Damping ($\gamma_{diss}$):</label>
+                        <div class="flex items-center gap-x-3 mt-1">
+                            <input type="range" id="paramGamma" min="0" max="1" step="0.01" value="0.2" class="w-full">
+                            <input type="number" id="inputGamma" min="0" max="1" step="0.01" value="0.20" class="w-20 p-1 border border-gray-300 rounded-md shadow-sm text-sm text-center">
+                        </div>
                     </div>
+                    <!-- Initial Condition -->
                     <div class="col-span-full flex flex-col">
                         <label for="paramInit" class="text-sm font-medium text-gray-600 mb-1" data-tooltip-content="The starting profile of $u$ at time $t=0$.">Initial Condition:</label>
                         <select id="paramInit" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-base h-10">
@@ -311,7 +330,7 @@
                             <option value="sine">Sine</option>
                         </select>
                     </div>
-                    <!-- NEW: Enable Tooltips Checkbox -->
+                    <!-- Enable Tooltips Checkbox -->
                     <div class="col-span-full flex items-center mt-4">
                         <input type="checkbox" id="enableTooltips" class="form-checkbox h-4 w-4 text-indigo-600 transition duration-150 ease-in-out rounded-md">
                         <label for="enableTooltips" class="ml-2 text-sm font-medium text-gray-700" data-tooltip-content="Toggle dashboard-wide tooltips for mathematical equations and important labels. Chart hover effects are always active.">Enable Equation Tooltips</label>
@@ -361,15 +380,14 @@
                     </button>
                 </div>
                 <div class="flex justify-around gap-4 mt-4">
-                    <button id="btnHelp" class="flex-1 px-6 py-3 bg-gray-600 text-white font-semibold rounded-lg shadow-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150 h-10" title="How to Interpret the Dashboard">
-                        <svg class="inline-block w-5 h-5 mr-2 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9.247a8.5 8.5 0 00-1.743 6.035m1.743-6.035A8.5 8.5 0 0115.772 9.247m-7.544 0l-.134.024A8.5 8.5 0 0012 20.5v-3.375c0-.621-.504-1.125-1.125-1.125H9.375c-.621 0-1.125.504-1.125 1.125V20.5c0 .621.504 1.125 1.125 1.125h1.5c.621 0 1.125-.504 1.125-1.125V20.5m-3.75-11.25c.828-.005 1.649.035 2.458.118M12 10.5h.008v.008H12V10.5zm2.912 0L15 10.508c.828-.005 1.649.035 2.458.118"></path></svg>
+                    <button id="btnHelp" class="flex-1 px-4 py-2 bg-gray-600 text-white font-semibold rounded-lg shadow-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150 h-10 flex items-center justify-center" title="How to Interpret the Dashboard">
                         How to Interpret
                     </button>
                 </div>
             </div>
 
             <!-- Right Panel: Live Visualization -->
-            <div class="lg:w-3/5 bg-gray-50 p-6 rounded-lg border border-gray-200 shadow-sm relative">
+            <div class="lg:w-3/5 bg-gray-50 p-6 rounded-lg border border-gray-200 shadow-md relative">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-2xl font-bold text-gray-700">Live Simulation <span id="liveSimSubtitle" class="ml-2 text-base font-semibold"></span></h2>
                     <div id="simulationActivityIndicator" class="hidden">
@@ -446,7 +464,7 @@
         </div>
 
         <!-- Simulation Metrics Section -->
-        <div class="mt-8 bg-gray-50 p-6 rounded-lg border border-gray-200 shadow-sm">
+        <div class="mt-8 bg-gray-50 p-6 rounded-lg border border-gray-200 shadow-md">
             <h2 class="text-2xl font-bold text-gray-700 mb-6">Simulation Metrics</h2>
             <div id="metricsContent" class="p-4 bg-white rounded-b-lg shadow-inner border border-gray-300">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -490,27 +508,21 @@
                     <div class="grid grid-cols-2 gap-4 w-full max-w-md">
                         <button id="btnResults" class="px-6 py-3 bg-purple-600 text-white font-semibold rounded-lg shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition ease-in-out duration-150 h-10" disabled title="Interpret Current Simulation State">
                             <span class="flex items-center justify-center">
-                                <svg class="inline-block w-5 h-5 mr-2 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m7 0V3m0 8V3"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 17H5a2 2 0 01-2-2V9a2 2 0 012-2h5l2 2m0 7l-2-2m0 0l2-2"></path></svg>
                                 ✨ Results
                             </span>
                         </button>
                         <button id="btnInterpretKids" class="px-6 py-3 bg-blue-400 text-white font-semibold rounded-lg shadow-md hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-2 transition ease-in-out duration-150 h-10" disabled title="Ask Einstein for a simple explanation">
                             <span class="flex items-center justify-center">
-                                <svg class="inline-block w-5 h-5 mr-2 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 0012 9V0m0 18.364A9 9 0 015.636 5.636M12 18.364V24m-6.364-5.636A9 9 0 0112 12c0-1.01.372-2.008 1.05-2.736M12 12c.7-.73 1.7-.73 2.4-.01M12 12c-.7-.73-1.7-.73-2.4-.01"></path></svg>
-                                Ask Einstein
+                                ✨ Ask Einstein
                             </span>
                         </button>
                         <button id="btnQA" class="px-6 py-3 bg-orange-500 text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 transition ease-in-out duration-150 h-10" disabled title="Generate Questions & Answers">
                             <span class="flex items-center justify-center">
-                                <svg class="inline-block w-5 h-5 mr-2 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9.247a8.5 8.5 0 00-1.743 6.035m1.743-6.035A8.5 8.5 0 0115.772 9.247m-7.544 0l-.134.024A8.5 8.5 0 0012 20.5v-3.375c0-.621-.504-1.125-1.125-1.125H9.375c-.621 0-1.125.504-1.125 1.125V20.5c0 .621.504 1.125 1.125 1.125h1.5c.621 0 1.125-.504 1.125-1.125V20.5m-3.75-11.25c.828-.005 1.649.035 2.458.118M12 10.5h.008v.008H12V10.5zm2.912 0L15 10.508c.828-.005 1.649.035 2.458.118"></path></svg>
-                                Q&A
+                                ✨ Q&A
                             </span>
                         </button>
-                        <button id="btnConversation" class="px-6 py-3 bg-emerald-500 text-white font-semibold rounded-lg shadow-md hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 transition ease-in-out duration-150 h-10" title="Listen to a conversation about Navier-Stokes">
-                            <span class="flex items-center justify-center">
-                                <svg class="inline-block w-5 h-5 mr-2 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464A9.001 9.001 0 0012 5.051V3a2 2 0 00-2-2H8a2 2 0 00-2 2v2.051a9.001 9.001 0 00-3.536 3.413M12 21v-2.051a9.001 9.001 0 003.536-3.413M12 21a9.001 9.001 0 00-3.536-3.413M12 21h2a2 2 0 002-2v-2.051a9.001 9.001 0 003.536-3.413"></path></svg>
-                                Conversation
-                            </span>
+                        <button id="btnConversation" class="px-6 py-3 bg-emerald-500 text-white font-semibold rounded-lg shadow-md hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 transition ease-in-out duration-150 h-10 flex items-center justify-center" title="Listen to a conversation about Navier-Stokes">
+                            Conversation
                         </button>
                         <!-- IMPORTANT: Updated src with the new GitHub Pages audio URL -->
                         <audio id="navierStokesAudio" src="https://quantumq-ai.github.io/QQ_1D_Navier_Stokes_Conjecture_Simulator/NavierStokesConversation.mp3" preload="auto"></audio>
@@ -523,7 +535,7 @@
         </div>
 
         <!-- Tabbed Results Section (formerly the main results section) -->
-        <div class="mt-8 bg-gray-50 p-6 rounded-lg border border-gray-200 shadow-sm">
+        <div class="mt-8 bg-gray-50 p-6 rounded-lg border border-gray-200 shadow-md">
             <h2 class="text-2xl font-bold text-gray-700 mb-6">Detailed Results</h2>
             <div class="flex border-b border-gray-200">
                 <button id="tabFinalState" class="px-4 py-2 text-sm font-medium text-gray-600 border-b-2 border-transparent hover:border-indigo-500 focus:outline-none active:border-indigo-600 transition duration-150 ease-in-out">Final State</button>
@@ -556,9 +568,9 @@
                     <li>$\frac{\partial^2 u}{\partial x^2}$ represents the spatial curvature of $u$, related to diffusion.</li>
                 </ul>
             </p>
-            <p class="mb-4 text-red-600 font-semibold border border-red-500 p-3 rounded-md">
+            <div class="mt-4 mb-4 text-red-600 font-semibold border border-red-500 p-3 rounded-md">
                 <strong class="underline">CRITICAL CLARIFICATION:</strong> This 1D Reaction-Diffusion PDE is **fundamentally different** from the 3D Navier-Stokes equations relevant to the Millennium Prize Problem. The parameters ($\nu_{eff}$, $\beta_{NL}$, $\gamma_{diss}$) in this simulator are *analogue* terms for a 1D model and do **NOT** directly correspond to the spectral index ($\alpha$), RG exponent ($\beta$), or vorticity alignment ($\cos \theta$) from the 3D Navier-Stokes regularity problem. This simulator is designed for general PDE exploration and understanding of reaction-diffusion phenomena, **not for direct verification or proof of the 3D Navier-Stokes existence and smoothness conjecture.**
-            </p>
+            </div>
 
             <h3 class="text-xl font-semibold text-gray-700 mb-2 mt-6">2. Simulation Parameters</h3>
             <ul class="list-disc list-inside ml-4 text-gray-700 space-y-2">
@@ -858,23 +870,25 @@
                 this.maxStdDev = 0;
                 this.maxEnergy = 0;
 
-                // Chart zoom levels and pan modes - REMOVED
                 this.chartStates = {}; 
 
                 // Initialize elements that are always present in the DOM
                 this.elements = {
+                    // Parameter Sliders
                     paramL: document.getElementById('paramL'),
-                    valueL: document.getElementById('valueL'),
                     paramN: document.getElementById('paramN'),
-                    valueN: document.getElementById('valueN'),
                     paramT: document.getElementById('paramT'),
-                    valueT: document.getElementById('valueT'),
                     paramAlpha: document.getElementById('paramAlpha'),
-                    valueAlpha: document.getElementById('valueAlpha'),
                     paramBeta: document.getElementById('paramBeta'),
-                    valueBeta: document.getElementById('valueBeta'),
                     paramGamma: document.getElementById('paramGamma'),
-                    valueGamma: document.getElementById('valueGamma'),
+                    // Parameter Inputs
+                    inputL: document.getElementById('inputL'),
+                    inputN: document.getElementById('inputN'),
+                    inputT: document.getElementById('inputT'),
+                    inputAlpha: document.getElementById('inputAlpha'),
+                    inputBeta: document.getElementById('inputBeta'),
+                    inputGamma: document.getElementById('inputGamma'),
+                    
                     paramInit: document.getElementById('paramInit'),
                     
                     btnRun: document.getElementById('btnRun'),
@@ -950,16 +964,14 @@
 
                 // Define activateTab as an arrow function property after elements are initialized
                 this.activateTab = (tabName) => {
-                    // Cursors are removed, so no need to hide them here.
-
                     [this.elements.tabFinalState, this.elements.tabTimeEvolution, this.elements.tabAnalysis].forEach(tab => {
                         tab.classList.remove('border-indigo-600', 'text-indigo-600');
                         tab.classList.add('border-transparent', 'text-gray-600');
                     });
 
                     // Hide all content divs
-                    const finalStateWrapper = document.getElementById('finalStateWrapper'); // Use wrapper ID
-                    const timeEvolutionWrapper = document.getElementById('timeEvolutionWrapper'); // Use wrapper ID
+                    const finalStateWrapper = document.getElementById('finalStateWrapper');
+                    const timeEvolutionWrapper = document.getElementById('timeEvolutionWrapper');
                     const analysisDiv = document.getElementById('analysisContent');
 
                     if (finalStateWrapper) finalStateWrapper.style.display = 'none';
@@ -1001,31 +1013,77 @@
                 this._boundHandleTooltipHide = this.handleTooltipHide.bind(this);
 
                 this.setupEventListeners();
-                this.updateSliderValues();
+                this.updateAllSliderTrackColors();
                 this.initializeCharts(); // Initialize live chart and metric charts
                 this.resetMetricsDisplay(); // Reset metrics on load
                 this.updateButtonStates(); // Set initial button states
                 this.updateLiveSimulationTitle(); // Set initial title
                 this.updateLiveDataTable(); // Initialize live data table
             }
+            
+            // NEW: Helper function to sync a slider with a number input
+            setupSync(sliderId, inputId, fixedPoints = 0) {
+                const slider = document.getElementById(sliderId);
+                const input = document.getElementById(inputId);
+                if (!slider || !input) return;
+
+                // Event listener for slider movement
+                slider.oninput = () => {
+                    input.value = parseFloat(slider.value).toFixed(fixedPoints);
+                    this.updateSliderTrackColor(slider);
+                    this.currentPresetName = "Custom"; // Any manual change makes it custom
+                    this.updateLiveSimulationTitle();
+                };
+
+                // Event listener for number input change
+                input.onchange = () => { // Using onchange is better for UX than oninput for text fields
+                    let value = parseFloat(input.value);
+                    const min = parseFloat(slider.min);
+                    const max = parseFloat(slider.max);
+                    
+                    // Validate and clamp the value
+                    if (isNaN(value)) {
+                        value = min;
+                    }
+                    value = Math.max(min, Math.min(max, value));
+                    
+                    // Update both slider and input to be in sync
+                    slider.value = value;
+                    input.value = value.toFixed(fixedPoints); // Re-format to ensure consistency
+                    this.updateSliderTrackColor(slider);
+                    this.currentPresetName = "Custom";
+                    this.updateLiveSimulationTitle();
+                };
+            }
 
             // New helper function to update a single slider's track color
             updateSliderTrackColor(sliderElement) {
+                if (!sliderElement) return;
                 const value = parseFloat(sliderElement.value);
                 const min = parseFloat(sliderElement.min);
                 const max = parseFloat(sliderElement.max);
                 const percentage = ((value - min) / (max - min)) * 100;
                 sliderElement.style.setProperty('--slider-value-percent', `${percentage}%`);
             }
+            
+            // NEW: Helper to update all slider tracks on load
+            updateAllSliderTrackColors() {
+                this.updateSliderTrackColor(this.elements.paramL);
+                this.updateSliderTrackColor(this.elements.paramN);
+                this.updateSliderTrackColor(this.elements.paramT);
+                this.updateSliderTrackColor(this.elements.paramAlpha);
+                this.updateSliderTrackColor(this.elements.paramBeta);
+                this.updateSliderTrackColor(this.elements.paramGamma);
+            }
 
             setupEventListeners() {
-                // Parameter sliders
-                if (this.elements.paramL) this.elements.paramL.oninput = () => { this.elements.valueL.textContent = parseFloat(this.elements.paramL.value).toFixed(1); this.updateSliderTrackColor(this.elements.paramL); };
-                if (this.elements.paramN) this.elements.paramN.oninput = () => { this.elements.valueN.textContent = parseInt(this.elements.paramN.value); this.updateSliderTrackColor(this.elements.paramN); };
-                if (this.elements.paramT) this.elements.paramT.oninput = () => { this.elements.valueT.textContent = parseFloat(this.elements.paramT.value).toFixed(1); this.updateSliderTrackColor(this.elements.paramT); };
-                if (this.elements.paramAlpha) this.elements.paramAlpha.oninput = () => { this.elements.valueAlpha.textContent = parseFloat(this.elements.paramAlpha.value).toFixed(2); this.updateSliderTrackColor(this.elements.paramAlpha); };
-                if (this.elements.paramBeta) this.elements.paramBeta.oninput = () => { this.elements.valueBeta.textContent = parseFloat(this.elements.paramBeta.value).toFixed(2); this.updateSliderTrackColor(this.elements.paramBeta); };
-                if (this.elements.paramGamma) this.elements.paramGamma.oninput = () => { this.elements.valueGamma.textContent = parseFloat(this.elements.paramGamma.value).toFixed(2); this.updateSliderTrackColor(this.elements.paramGamma); };
+                // Sync sliders and number inputs
+                this.setupSync('paramL', 'inputL', 1);
+                this.setupSync('paramN', 'inputN', 0);
+                this.setupSync('paramT', 'inputT', 1);
+                this.setupSync('paramAlpha', 'inputAlpha', 2);
+                this.setupSync('paramBeta', 'inputBeta', 2);
+                this.setupSync('paramGamma', 'inputGamma', 2);
 
                 // Buttons
                 if (this.elements.btnRun) this.elements.btnRun.onclick = () => this.handleRunStop();
@@ -1107,8 +1165,6 @@
                     // Bind the event handler to the dashboard instance
                     this.elements.enableTooltips.onchange = this.handleEnableTooltipsChange.bind(this);
                 }
-
-                // Removed chart control buttons event listeners as functionality is removed
             }
 
             // NEW: Separate handler for enableTooltips change event
@@ -1183,22 +1239,29 @@
                     this.handleRunStop(); // This will toggle it to stopped
                 }
 
-                // Set parameter values
+                // Set parameter values for sliders and inputs
                 this.elements.paramL.value = presetConfig.L;
+                this.elements.inputL.value = presetConfig.L.toFixed(1);
+                
                 this.elements.paramN.value = presetConfig.N;
+                this.elements.inputN.value = presetConfig.N;
+
                 this.elements.paramT.value = presetConfig.T;
+                this.elements.inputT.value = presetConfig.T.toFixed(1);
+
                 this.elements.paramAlpha.value = presetConfig.nu_eff;
+                this.elements.inputAlpha.value = presetConfig.nu_eff.toFixed(2);
+
                 this.elements.paramBeta.value = presetConfig.beta_NL;
+                this.elements.inputBeta.value = presetConfig.beta_NL.toFixed(2);
+
                 this.elements.paramGamma.value = presetConfig.gamma_diss;
+                this.elements.inputGamma.value = presetConfig.gamma_diss.toFixed(2);
+                
                 this.elements.paramInit.value = presetConfig.init_cond;
 
-                // Manually trigger oninput/onchange to update display and track colors
-                this.elements.paramL.oninput();
-                this.elements.paramN.oninput();
-                this.elements.paramT.oninput();
-                this.elements.paramAlpha.oninput();
-                this.elements.paramBeta.oninput();
-                this.elements.paramGamma.oninput();
+                // Update all slider track colors
+                this.updateAllSliderTrackColors();
                 
                 this.currentPresetName = presetConfig.name; // Set the preset name
                 this.updateLiveSimulationTitle(); // Update the title immediately
@@ -1206,33 +1269,6 @@
                 // Refresh the application with new parameters and start simulation
                 this.refreshApplication(true); // Pass true to keep the preset name
                 this.handleRunStop(); // Start the simulation
-            }
-
-            updateSliderValues() {
-                if (this.elements.paramL) {
-                    this.elements.valueL.textContent = parseFloat(this.elements.paramL.value).toFixed(1);
-                    this.updateSliderTrackColor(this.elements.paramL);
-                }
-                if (this.elements.paramN) {
-                    this.elements.valueN.textContent = parseInt(this.elements.paramN.value);
-                    this.updateSliderTrackColor(this.elements.paramN);
-                }
-                if (this.elements.paramT) {
-                    this.elements.valueT.textContent = parseFloat(this.elements.paramT.value).toFixed(1);
-                    this.updateSliderTrackColor(this.elements.paramT);
-                }
-                if (this.elements.paramAlpha) {
-                    this.elements.valueAlpha.textContent = parseFloat(this.elements.paramAlpha.value).toFixed(2);
-                    this.updateSliderTrackColor(this.elements.paramAlpha);
-                }
-                if (this.elements.paramBeta) {
-                    this.elements.valueBeta.textContent = parseFloat(this.elements.paramBeta.value).toFixed(2);
-                    this.updateSliderTrackColor(this.elements.paramBeta);
-                }
-                if (this.elements.paramGamma) {
-                    this.elements.valueGamma.textContent = parseFloat(this.elements.paramGamma.value).toFixed(2);
-                    this.updateSliderTrackColor(this.elements.paramGamma);
-                }
             }
 
             initializeCharts() {
@@ -1294,13 +1330,11 @@
                             plugins: {
                                 legend: { display: false },
                                 title: { display: true, text: config.title }
-                                // Zoom plugin options REMOVED
                             }
                         }
                     });
                     this[config.chartVar] = newChart;
                     
-                    // Store initial scale limits for reset functionality (even without zoom/pan, good for consistency)
                     this.chartStates[config.id] = {
                         chartInstance: newChart,
                         initialXScale: {
@@ -1312,10 +1346,7 @@
                             max: newChart.options.scales.y.max
                         }
                     };
-
-                    // Double click listener for zoom in REMOVED
                 });
-                // updateChartControlButtons REMOVED as no controls exist
             }
 
             updateMetricsDisplay(u_array = this.simulator.u, time = this.simulator.timeSteps[this.simulator.timeSteps.length - 1]) {
@@ -1323,9 +1354,6 @@
 
                 const currentResults = this.simulator.analyzeResults(u_array); // Pass u_array to analyzeResults
 
-                // Only push to history if it's the actual simulation progressing, not playback
-                // This logic is now handled by the playback scrub. When scrubbing, we just update display.
-                // When simulation is running, we push.
                 if (this.isSimulationRunning && !this.isSimulationPaused) {
                     this.meanValueHistory.push(currentResults.mean_value);
                     this.energyHistory.push(currentResults.energy);
@@ -1368,9 +1396,6 @@
                  'metricEnergy_current', 'metricEnergy_max'].forEach(id => {
                     this.elements[id].textContent = '0.0000';
                 });
-
-                // Charts are destroyed and re-initialized in refreshApplication now.
-                // So, no need to destroy and re-initialize them here.
             }
 
             updateCharts() {
@@ -1378,8 +1403,7 @@
                 const getChartYMax = (dataArray) => {
                     if (dataArray.length === 0) return undefined;
                     const maxVal = Math.max(...dataArray);
-                    // Add 10% padding above the max value for better visual spacing
-                    return maxVal > 0 ? maxVal * 1.1 : (maxVal < 0 ? maxVal * 0.9 : 0.1); // Ensure a small non-zero max if all data is zero
+                    return maxVal > 0 ? maxVal * 1.1 : (maxVal < 0 ? maxVal * 0.9 : 0.1);
                 };
 
                 if (this.meanValChart) {
@@ -1394,8 +1418,6 @@
                     this.energyChart.options.scales.y.max = getChartYMax(this.energyHistory);
                     this.energyChart.update();
                 }
-
-                // Live chart is updated in runSimulation loop directly
             }
 
             updateButtonStates() {
@@ -1506,13 +1528,7 @@
                         this.hasSimulationData = false; // No simulation data yet
                     }
                 }
-
-                // Chart control buttons are removed, so no need to update their states.
             }
-
-            // Removed updateChartControlButtons method
-
-            // Removed handleChartControl method
 
             async runSimulationLoop() {
                 if (!this.simulator) {
@@ -1526,7 +1542,6 @@
                     this.simulator = new ConjectureSimulator1D(L, N, T, 0.01, nu_eff, beta_NL, gamma_diss, init_cond);
                 }
                 
-                // Ensure charts are initialized before running, in case they were destroyed by a reset
                 if (!this.liveChart || !this.meanValChart || !this.energyChart) {
                     this.initializeCharts();
                 }
@@ -1557,7 +1572,6 @@
                     this.simulator.step();
                     this.currentSimStep = i;
                     
-                    // Only save snapshots and update full metrics history if not in playback mode
                     if (i % snapshot_interval === 0 || i === n_steps) {
                         this.simulator.snapshots.push(Array.from(this.simulator.u));
                         this.simulator.timeSteps.push(i * this.simulator.dt);
@@ -1581,7 +1595,6 @@
                 this.updateButtonStates();
                 this.updateLiveSimulationTitle(); // Reset title to 'Custom' or default after completion
 
-                // Set playback slider to final time
                 if (this.elements.playbackSlider && this.simulator) {
                     this.elements.playbackSlider.max = this.simulator.T;
                     this.elements.playbackSlider.value = this.simulator.T;
@@ -1597,9 +1610,7 @@
                     this.isSimulationPaused = false; // Ensure not paused if stopped
                     this.hasSimulationData = true; // Simulation stopped, but data is now available
                 } else {
-                    // Reset if starting a new simulation from scratch
                     if (this.currentSimStep === 0) {
-                        // currentPresetName is already set by applyPreset, so no need to set to "Custom" here
                         this.refreshApplication(true); // Pass true to keep the preset name
                     }
                     this.runSimulationLoop();
@@ -1621,55 +1632,45 @@
                 this.elements.progressBar.style.width = '0%';
                 this.elements.percentageCounter.textContent = '0%'; // Reset percentage counter
                 
-                // Destroy all Chart.js instances cleanly before clearing DOM elements
                 if (this.liveChart) { this.liveChart.destroy(); this.liveChart = null; }
                 if (this.meanValChart) { this.meanValChart.destroy(); this.meanValChart = null; }
                 if (this.energyChart) { this.energyChart.destroy(); this.energyChart = null; }
                 if (this.finalStateChart) { this.finalStateChart.destroy(); this.finalStateChart = null; }
                 if (this.timeEvolutionChart) { this.timeEvolutionChart.destroy(); this.timeEvolutionChart = null; }
 
-                // Clear the chartStates object to remove references to old, destroyed chart instances
                 this.chartStates = {}; 
 
-                this.resetMetricsDisplay(); // This will clear metric history but not re-initialize charts
-                this.simulator = null; // Clear simulator instance to force re-initialization
-                this.hasSimulationData = false; // No simulation data after refresh
+                this.resetMetricsDisplay();
+                this.simulator = null;
+                this.hasSimulationData = false;
                 
-                if (!keepPresetName) { // Only reset to Custom if not keeping a preset name
+                if (!keepPresetName) {
                     this.currentPresetName = "Custom"; 
                 }
-                this.updateLiveSimulationTitle(); // Update title
+                this.updateLiveSimulationTitle();
                 
-                // Clear detailed results content after charts are destroyed
                 if (this.elements.detailedResultsContent) {
                     this.elements.detailedResultsContent.innerHTML = '<p class="text-gray-500 text-center py-8">Run a simulation to see results here.</p>';
                 }
 
-                // Re-initialize the static charts after destroying them
                 this.initializeCharts();
                 
-                // Re-enable run button and disable export/interpret
                 this.updateButtonStates();
 
-                this.updateLiveDataTable(); // Clear the live data table
+                this.updateLiveDataTable();
                 this.activateTab('finalState');
 
-                // Hide and reset playback controls
                 if (this.elements.playbackControls) {
                     this.elements.playbackControls.classList.add('hidden');
                     this.elements.playbackSlider.value = 0;
                     this.elements.playbackCurrentTime.textContent = 'Time: 0.00s';
-                    this.elements.playbackTotalTime.textContent = '0.00s'; // Reset total time display
+                    this.elements.playbackTotalTime.textContent = '0.00s';
                 }
 
-                // The loop below will now iterate over the *new* chart instances populated by initializeCharts()
-                // or an empty object if no charts were initialized (e.g., if canvas elements were missing).
-                // The `chart.update()` here is likely redundant for newly initialized charts,
-                // but it won't cause an error if `chartStates` is properly cleared.
                 for (const chartId in this.chartStates) {
                     if (this.chartStates.hasOwnProperty(chartId)) {
                         const chartState = this.chartStates[chartId];
-                        if (chartState.chartInstance) { // Ensure the instance exists
+                        if (chartState.chartInstance) {
                             const chart = chartState.chartInstance;
                             if (chart.options && chart.options.scales) {
                                 chart.options.scales.x.min = chartState.initialXScale.min;
@@ -1683,7 +1684,6 @@
                 }
             }
 
-            // Function to update the Live Simulation title dynamically
             updateLiveSimulationTitle() {
                 const subtitleSpan = this.elements.liveSimSubtitle;
                 if (!subtitleSpan) return;
@@ -1700,7 +1700,6 @@
                 }
             }
 
-            // NEW: Function to toggle detailed table visibility
             toggleDetailedTableVisibility() {
                 this.isDetailedTableVisible = !this.isDetailedTableVisible;
                 if (this.elements.detailedDataTableContainer) {
@@ -1712,18 +1711,14 @@
                 if (this.elements.toggleDetailedTable) {
                     this.elements.toggleDetailedTable.textContent = this.isDetailedTableVisible ? 'Hide Detailed Data' : 'Show Detailed Data';
                 }
-                // If showing detailed table, ensure it's populated with current data
                 if (this.isDetailedTableVisible) {
                     this.updateLiveDataTable();
                 }
-                // Re-typeset MathJax for the summary table when its visibility changes
                 if (this.elements.simpleDataTableSummary && typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
                     MathJax.typesetPromise([this.elements.simpleDataTableSummary]);
                 }
             }
 
-            // NEW: Function to update the live data table with selectable metrics
-            // Now accepts an optional u_data array for displaying specific snapshots
             updateLiveDataTable(u_data = this.simulator ? this.simulator.u : null) {
                 const tableBody = this.elements.liveDataTableBody;
                 const valueHeader = this.elements.liveTableValueHeader;
@@ -1735,7 +1730,6 @@
                     return;
                 }
 
-                // Always update the simple summary
                 if (this.simulator && u_data) {
                     const u_at_0 = u_data[0];
                     const u_at_L2_index = Math.floor(this.simulator.N / 2);
@@ -1747,11 +1741,9 @@
                     summaryUL2.textContent = '0.0000';
                 }
 
-                // Only update the detailed table if it's visible
                 if (!this.isDetailedTableVisible) {
                     tableBody.innerHTML = ''; // Clear existing rows if hidden
                     valueHeader.innerHTML = 'Value ($u(x,t)$)'; // Reset header
-                    // Re-typeset MathJax for the header if it was changed
                     if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
                         MathJax.typesetPromise([valueHeader]);
                     }
@@ -1771,19 +1763,17 @@
                 }
 
                 const N = this.simulator.N;
-                const pointsToShow = Math.min(N, 10); // Display up to 10 points, or fewer if N is small
+                const pointsToShow = Math.min(N, 10);
                 const uniqueIndices = [];
 
-                // Select representative indices (evenly distributed)
                 for (let i = 0; i < pointsToShow; i++) {
                     uniqueIndices.push(Math.floor(i * (N - 1) / (pointsToShow - 1)));
                 }
 
-                // Ensure indices are unique and sorted
                 const sortedUniqueIndices = [...new Set(uniqueIndices)].sort((a, b) => a - b);
 
                 let valuesToDisplay = [];
-                let headerText = 'Value'; // Default header
+                let headerText = 'Value';
 
                 switch (this.currentTableDisplayMode) {
                     case 'u':
@@ -1815,7 +1805,6 @@
                         headerText = 'Value ($u(x,t)$)';
                 }
 
-                // Update the table header with MathJax
                 valueHeader.innerHTML = headerText;
                 if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
                     MathJax.typesetPromise([valueHeader]);
@@ -1835,30 +1824,24 @@
                 });
             }
 
-            // NEW: Handle playback slider scrub
             handlePlaybackScrub() {
                 if (!this.simulator || this.simulator.snapshots.length === 0) return;
 
                 const currentTime = parseFloat(this.elements.playbackSlider.value);
                 this.elements.playbackCurrentTime.textContent = `Time: ${currentTime.toFixed(2)}s`;
-                this.updateSliderTrackColor(this.elements.playbackSlider); // Update track color
+                this.updateSliderTrackColor(this.elements.playbackSlider);
 
                 const snapshotIndex = this.findSnapshotIndexForTime(currentTime);
                 const selectedSnapshot = this.simulator.snapshots[snapshotIndex];
                 const selectedTime = this.simulator.timeSteps[snapshotIndex];
 
-                // Update live chart
                 this.liveChart.data.datasets[0].data = selectedSnapshot;
                 this.liveChart.update();
 
-                // Update live data table (both summary and detailed if visible)
                 this.updateLiveDataTable(selectedSnapshot);
 
-                // Update current metrics display
                 this.updateMetricsDisplay(selectedSnapshot, selectedTime);
 
-                // Update mean value and energy charts for playback
-                // Only show data up to the current playback time
                 const slicedMeanHistory = this.meanValueHistory.slice(0, snapshotIndex + 1);
                 const slicedEnergyHistory = this.energyHistory.slice(0, snapshotIndex + 1);
                 const slicedTimeLabels = this.timeLabels.slice(0, snapshotIndex + 1);
@@ -1874,11 +1857,9 @@
                     this.energyChart.update();
                 }
 
-                // Update live simulation subtitle to indicate playback
                 this.elements.liveSimSubtitle.innerHTML = `<span class="text-blue-600">PLAYBACK (t=${selectedTime.toFixed(2)}s)</span>`;
             }
 
-            // Helper to find the closest snapshot index for a given time
             findSnapshotIndexForTime(time) {
                 if (!this.simulator || this.simulator.timeSteps.length === 0) return 0;
                 
@@ -1895,12 +1876,10 @@
                 return closestIndex;
             }
 
-            // Modal functions
             showModal(modalId) {
                 const modal = document.getElementById(modalId);
                 if (modal) {
                     modal.style.display = 'flex';
-                    // Typeset only the modal content when it's shown
                     if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
                         MathJax.typesetPromise([modal]);
                     }
@@ -1916,10 +1895,9 @@
                 }
             }
 
-            // Function to validate the API key input and update stored key
             validateAndSetApiKey() {
                 this.geminiApiKey = this.elements.geminiApiKeyInput.value.trim();
-                this.updateButtonStates(); // Update button state based on key presence
+                this.updateButtonStates();
             }
 
             async interpretSimulationState() {
@@ -1942,11 +1920,9 @@
                     return;
                 }
 
-                // Proceed with Gemini interpretation
                 const genAI = new GoogleGenerativeAI(currentApiKey);
                 const geminiModel = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
-                // Get metrics from the final state for interpretation
                 const currentResults = this.simulator.analyzeResults(this.simulator.snapshots[this.simulator.snapshots.length - 1]);
 
                 const prompt = `
@@ -1982,7 +1958,6 @@
                     const result = await geminiModel.generateContent(prompt);
                     const text = await result.response.text();
                     this.elements.aiInterpretationContent.innerHTML = `<div class="prose max-w-none">${text.replace(/\n/g, '<br>')}</div>`;
-                    // Process MathJax in the newly loaded content
                     if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
                         MathJax.typesetPromise([this.elements.aiInterpretationContent]);
                     }
@@ -1992,14 +1967,13 @@
                 }
             }
 
-            // NEW: Interpretation for a 16-year-old
             async interpretSimulationStateForKids() {
                 this.showModal('aiInterpretationModal');
                 this.elements.aiInterpretationContent.innerHTML = `
                     <div class="flex justify-center items-center py-8">
                         <span class="spinner w-8 h-8 !border-t-blue-500 !border-gray-200"></span>
                         <span id="aiProgressMessage" class="ml-2 text-gray-600">Generating Einstein's explanation...</span>
-                    </div>`; // Use blue spinner
+                    </div>`;
                 this.elements.aiProgressMessage.textContent = "Generating Einstein's explanation...";
 
                 const currentApiKey = this.geminiApiKey;
@@ -2016,7 +1990,6 @@
                 const genAI = new GoogleGenerativeAI(currentApiKey);
                 const geminiModel = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
-                // Get metrics from the final state for interpretation
                 const currentResults = this.simulator.analyzeResults(this.simulator.snapshots[this.simulator.snapshots.length - 1]);
                 const finalTime = this.simulator.timeSteps[this.simulator.timeSteps.length - 1].toFixed(2);
                 const totalTime = this.simulator.T.toFixed(2);
@@ -2078,7 +2051,6 @@
                 }
             }
 
-            // NEW: Method to generate Q&A
             async generateQA() {
                 this.showModal('aiInterpretationModal');
                 this.elements.aiInterpretationContent.innerHTML = `
@@ -2142,7 +2114,6 @@
                             }
                         }
                     };
-                    // Use the currentApiKey directly in the URL
                     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${currentApiKey}`;
                     const response = await fetch(apiUrl, {
                         method: 'POST',
@@ -2150,14 +2121,12 @@
                         body: JSON.stringify(payload)
                     });
                     const result = await response.json();
-                    console.log("Raw Gemini API response:", result); // Log the full API response
 
                     if (result.candidates && result.candidates.length > 0 &&
                         result.candidates[0].content && result.candidates[0].content.parts &&
                         result.candidates[0].content.parts.length > 0) {
                         const jsonText = result.candidates[0].content.parts[0].text;
-                        console.log("Parsed JSON text from Gemini API:", jsonText); // Log raw JSON for debugging
-
+                        
                         let qaPairs;
                         try {
                             qaPairs = JSON.parse(jsonText);
@@ -2200,28 +2169,17 @@
                 } catch (error) {
                     console.error("Gemini API Error:", error);
                     this.elements.aiInterpretationContent.innerHTML = `<p class="text-red-600">Failed to get Q&A. ${error.message}. Please ensure your API key is correct and you have network connectivity.</p>`;
-                    this.elements.aiProgressMessage.textContent = `API Error: ${error.message.substring(0, 30)}...`; // Truncate for display
+                    this.elements.aiProgressMessage.textContent = `API Error: ${error.message.substring(0, 30)}...`;
                 }
             }
 
-            // NEW: Play Conversation Audio
             async playConversationAudio() {
                 const audio = this.elements.navierStokesAudio;
                 const btnConversation = this.elements.btnConversation;
 
-                // Define button HTML states
-                const originalButtonContent = `
-                    <svg class="inline-block w-5 h-5 mr-2 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464A9.001 9.001 0 0012 5.051V3a2 2 0 00-2-2H8a2 2 0 00-2 2v2.051a9.001 9.001 0 00-3.536 3.413M12 21v-2.051a9.001 9.001 0 003.536-3.413M12 21a9.001 9.001 0 00-3.536-3.413M12 21h2a2 2 0 002-2v-2.051a9.001 9.001 0 003.536-3.413"></path></svg>
-                    Conversation
-                `;
-                const pauseButtonContent = `
-                    <svg class="inline-block w-5 h-5 mr-2 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    Pause Conversation
-                `;
-                const errorButtonContent = `
-                    <svg class="inline-block w-5 h-5 mr-2 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197 2.132A1 1 0 0110 13.82V9.18a1 1 0 011.555-.832l3.197 2.132a1 1 0 010 1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    Play Failed (Retry)
-                `;
+                const originalButtonContent = `Conversation`;
+                const pauseButtonContent = `Pause Conversation`;
+                const errorButtonContent = `Play Failed (Retry)`;
 
                 if (audio) {
                     if (audio.paused) {
@@ -2231,10 +2189,9 @@
                         } catch (e) {
                             console.error("Error playing audio:", e);
                             btnConversation.innerHTML = errorButtonContent;
-                            // Optionally, reset button text after a delay
                             setTimeout(() => {
                                 btnConversation.innerHTML = originalButtonContent;
-                            }, 3000); // Reset after 3 seconds
+                            }, 3000);
                         }
                     } else {
                         audio.pause();
@@ -2243,7 +2200,6 @@
                 }
             }
 
-            // Helper to get chart instance by its canvas ID
             getChartById(canvasId) {
                 if (canvasId === 'livePlotCanvas') return this.liveChart;
                 if (canvasId === 'finalStateChartCanvas') return this.finalStateChart;
@@ -2252,8 +2208,6 @@
                 if (canvasId === 'energyChartCanvas') return this.energyChart;
                 return null;
             }
-
-            // Removed handleChartDoubleClick method
 
             showDetailedResults() {
                 if (!this.simulator) {
@@ -2266,7 +2220,6 @@
                 const snapshots = this.simulator.snapshots;
                 const xLabels = this.simulator.x.map(val => val.toFixed(2));
 
-                // Clear previous content and add canvas elements
                 this.elements.detailedResultsContent.innerHTML = `
                     <div id="finalStateWrapper" class="bg-gray-100 rounded-md border border-gray-300 p-2 mb-4 relative">
                         <canvas id="finalStateChartCanvas" class="w-full h-64"></canvas>
@@ -2292,19 +2245,15 @@
                     </div>
                 `;
 
-                // Re-get references to newly created canvas elements and their wrappers
                 const finalStateChartCanvas = document.getElementById('finalStateChartCanvas');
                 const timeEvolutionChartCanvas = document.getElementById('timeEvolutionChartCanvas');
-                const analysisDiv = document.getElementById('analysisContent'); // Get the newly created analysisDiv
+                const analysisDiv = document.getElementById('analysisContent');
                 const finalStateWrapper = document.getElementById('finalStateWrapper');
                 const timeEvolutionWrapper = document.getElementById('timeEvolutionWrapper');
 
-
-                // Destroy existing charts if they exist
                 if (this.finalStateChart) { this.finalStateChart.destroy(); }
                 if (this.timeEvolutionChart) { this.timeEvolutionChart.destroy(); }
 
-                // Final State Chart
                 if (finalStateChartCanvas) {
                     this.finalStateChart = new Chart(finalStateChartCanvas.getContext('2d'), {
                         type: 'line',
@@ -2315,7 +2264,7 @@
                                 data: finalState,
                                 borderColor: 'rgb(75, 192, 192)',
                                 borderWidth: 2,
-                                pointRadius: 0, // Removed nodes
+                                pointRadius: 0,
                                 fill: false,
                                 tension: 0.1
                             }]
@@ -2330,7 +2279,6 @@
                             plugins: {
                                 legend: { display: false },
                                 title: { display: true, text: 'Final State' }
-                                // Zoom plugin options REMOVED
                             }
                         }
                     });
@@ -2339,13 +2287,11 @@
                         initialXScale: { min: this.finalStateChart.options.scales.x.min, max: this.finalStateChart.options.scales.x.max },
                         initialYScale: { min: this.finalStateChart.options.scales.y.min, max: this.finalStateChart.options.scales.y.max }
                     };
-                    // Double click listener for zoom in REMOVED
                 }
 
-                // Time Evolution Chart (showing a few snapshots)
                 if (timeEvolutionChartCanvas) {
                     const timeEvolutionDatasets = [];
-                    const numSnapshotsToShow = Math.min(snapshots.length, 5); // Show up to 5 snapshots
+                    const numSnapshotsToShow = Math.min(snapshots.length, 5);
                     const step = Math.floor(snapshots.length / numSnapshotsToShow);
 
                     for (let i = 0; i < numSnapshotsToShow; i++) {
@@ -2353,23 +2299,22 @@
                         if (index < snapshots.length) {
                             timeEvolutionDatasets.push({
                                 label: `t = ${timeSteps[index].toFixed(2)}`,
-                                data: snapshots[index], // Use the actual snapshot data
-                                borderColor: `hsl(${i * (360 / numSnapshotsToShow)}, 70%, 50%)`, // Different color for each line
+                                data: snapshots[index],
+                                borderColor: `hsl(${i * (360 / numSnapshotsToShow)}, 70%, 50%)`,
                                 borderWidth: 2,
-                                pointRadius: 0, // Removed nodes
+                                pointRadius: 0,
                                 fill: false,
                                 tension: 0.1
                             });
                         }
                     }
-                    // Always add the final state as the last line
                     if (snapshots.length > 0 && numSnapshotsToShow < snapshots.length) {
                          timeEvolutionDatasets.push({
                             label: `t = ${timeSteps[timeSteps.length - 1].toFixed(2)} (Final)`,
                             data: snapshots[snapshots.length - 1],
-                            borderColor: 'rgb(255, 99, 132)', // Distinct color for final state
+                            borderColor: 'rgb(255, 99, 132)',
                             borderWidth: 3,
-                            pointRadius: 0, // Removed nodes
+                            pointRadius: 0,
                             fill: false,
                             tension: 0.1
                         });
@@ -2391,7 +2336,6 @@
                             plugins: {
                                 legend: { display: true, position: 'bottom' },
                                 title: { display: true, text: 'Time Evolution Snapshots' }
-                                // Zoom plugin options REMOVED
                             }
                         }
                     });
@@ -2400,19 +2344,13 @@
                         initialXScale: { min: this.timeEvolutionChart.options.scales.x.min, max: this.timeEvolutionChart.options.scales.x.max },
                         initialYScale: { min: this.timeEvolutionChart.options.scales.y.min, max: this.timeEvolutionChart.options.scales.y.max }
                     };
-                    // Double click listener for zoom in REMOVED
                 }
 
-                // Activate the initial tab (Final State)
                 this.activateTab('finalState');
 
-                // Explicitly typeset MathJax for the analysis content after it's been added to the DOM
                 if (analysisDiv && typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
                     MathJax.typesetPromise([analysisDiv]);
                 }
-
-                // Re-attach event listeners for dynamically created chart control buttons - REMOVED
-                // As chart control buttons are removed, these event listeners are no longer needed.
             }
         }
 
@@ -2420,7 +2358,6 @@
         let dashboardInstance; // Declare a global variable for the dashboard instance
         document.addEventListener('DOMContentLoaded', () => {
             dashboardInstance = new SimulationDashboard(); // Assign the instance to the global variable
-            // Call activateTab here after the dashboard object is fully constructed
             dashboardInstance.activateTab(dashboardInstance.currentActiveTab);
         });
 
@@ -2428,38 +2365,33 @@
         window.onload = () => {
             const mainContentArea = document.getElementById('mainContentArea');
             const parameterSection = document.getElementById('parameterSection');
-            const metricsContent = document.getElementById('metricsContent'); // Get the static metrics content
-            const liveTableValueHeader = document.getElementById('liveTableValueHeader'); // Get the live table value header
-            const simpleDataTableSummary = document.getElementById('simpleDataTableSummary'); // Get the simple summary table
+            const metricsContent = document.getElementById('metricsContent');
+            const liveTableValueHeader = document.getElementById('liveTableValueHeader');
+            const simpleDataTableSummary = document.getElementById('simpleDataTableSummary');
 
-            // Check if MathJax is defined and its typesetting function is available
             if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
-                // Initial typesetting for the whole document
                 if (mainContentArea) {
                     MathJax.typesetPromise([mainContentArea]);
                 }
 
-                // As a fallback/reinforcement, specifically typeset the parameter section and static metrics after a small delay
                 setTimeout(() => {
                     if (parameterSection) {
                         MathJax.typesetPromise([parameterSection]);
                     }
-                    if (metricsContent) { // Ensure static metrics are typeset
+                    if (metricsContent) {
                         MathJax.typesetPromise([metricsContent]);
                     }
-                    // Typeset the initial live table header and summary table as well
                     if (liveTableValueHeader) {
                         MathJax.typesetPromise([liveTableValueHeader]);
                     }
                     if (simpleDataTableSummary) {
                         MathJax.typesetPromise([simpleDataTableSummary]);
                     }
-                }, 200); // Small delay, e.g., 200ms
+                }, 200);
             } else {
                 console.warn("MathJax not fully loaded or typesetPromise not available on window.onload.");
             }
 
-            // NEW: Move tooltip event listeners here to ensure mainContentArea is available
             if (dashboardInstance && dashboardInstance.elements.mainContentArea) {
                 dashboardInstance.elements.mainContentArea.addEventListener('mouseover', dashboardInstance._boundHandleTooltipShow);
                 dashboardInstance.elements.mainContentArea.addEventListener('mouseout', dashboardInstance._boundHandleTooltipHide);
