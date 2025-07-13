@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>1D Fluid Dynamics Analogue Simulator v23</title>
+    <title>1D Fluid Dynamics Analogue Simulator v26</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js CDN for plotting -->
@@ -254,6 +254,13 @@
 </head>
 <body class="bg-gray-50 font-sans antialiased text-gray-800 p-4 sm:p-6">
 
+    <div class="max-w-7xl mx-auto">
+        <div class="text-center mb-4">
+            <h1 class="text-lg font-light tracking-widest text-gray-600">Q U A N T U M &nbsp; Q &nbsp; | &nbsp; R E S E A R C H &nbsp;&nbsp; D I V I S I O N</h1>
+            <div class="border-t border-black mt-2"></div>
+        </div>
+    </div>
+
     <div class="max-w-7xl mx-auto bg-white shadow-lg rounded-xl p-6 sm:p-8 border border-gray-200" id="mainContentArea">
         <h1 class="text-3xl sm:text-4xl font-extrabold text-center text-indigo-700 mb-2">1D Fluid Dynamics Analogue Simulator</h1>
         <p class="text-center text-sm text-red-600 font-semibold mb-8">
@@ -277,7 +284,7 @@
                         <label for="paramL" class="block text-sm font-medium text-gray-600" data-tooltip-content="The total spatial extent of the 1D domain for the simulation.">System Length (L):</label>
                         <div class="flex items-center gap-x-3 mt-1">
                             <input type="range" id="paramL" min="1" max="50" step="1" value="10" class="w-full">
-                            <input type="number" id="inputL" min="1" max="50" step="1" value="10" class="w-20 p-1 border border-gray-300 rounded-md shadow-sm text-sm text-center">
+                            <input type="number" id="inputL" min="1" max="50" step="1" value="10" class="p-1 border border-gray-300 rounded-md shadow-sm text-sm text-center" style="width: 5rem;">
                         </div>
                     </div>
                     <!-- Grid Points -->
@@ -285,7 +292,7 @@
                         <label for="paramN" class="block text-sm font-medium text-gray-600" data-tooltip-content="The number of discrete points used to represent the spatial domain. Higher N means higher spatial resolution.">Grid Points (N):</label>
                         <div class="flex items-center gap-x-3 mt-1">
                             <input type="range" id="paramN" min="32" max="1024" step="32" value="256" class="w-full">
-                            <input type="number" id="inputN" min="32" max="1024" step="32" value="256" class="w-20 p-1 border border-gray-300 rounded-md shadow-sm text-sm text-center">
+                            <input type="number" id="inputN" min="32" max="1024" step="32" value="256" class="p-1 border border-gray-300 rounded-md shadow-sm text-sm text-center" style="width: 5rem;">
                         </div>
                     </div>
                     <!-- Total Time -->
@@ -293,7 +300,7 @@
                         <label for="paramT" class="block text-sm font-medium text-gray-600" data-tooltip-content="The total duration for which the simulation will run.">Total Time (T):</label>
                         <div class="flex items-center gap-x-3 mt-1">
                             <input type="range" id="paramT" min="0.1" max="50" step="0.5" value="5" class="w-full">
-                            <input type="number" id="inputT" min="0.1" max="50" step="0.5" value="5.0" class="w-20 p-1 border border-gray-300 rounded-md shadow-sm text-sm text-center">
+                            <input type="number" id="inputT" min="0.1" max="50" step="0.5" value="5.0" class="p-1 border border-gray-300 rounded-md shadow-sm text-sm text-center" style="width: 5rem;">
                         </div>
                     </div>
                     <!-- Diffusion Coefficient -->
@@ -301,7 +308,7 @@
                         <label for="paramAlpha" class="block text-sm font-medium text-gray-600" data-tooltip-content="The diffusion coefficient ($\nu_{eff}$) controls how quickly the quantity $u$ spreads out from regions of high concentration to low concentration. Higher $\nu_{eff}$ leads to faster smoothing. This parameter is analogous to viscosity in fluid dynamics.">Diff. Coefficient ($\nu_{eff}$):</label>
                         <div class="flex items-center gap-x-3 mt-1">
                             <input type="range" id="paramAlpha" min="0.01" max="1" step="0.01" value="0.1" class="w-full">
-                            <input type="number" id="inputAlpha" min="0.01" max="1" step="0.01" value="0.10" class="w-20 p-1 border border-gray-300 rounded-md shadow-sm text-sm text-center">
+                            <input type="number" id="inputAlpha" min="0.01" max="1" step="0.01" value="0.10" class="p-1 border border-gray-300 rounded-md shadow-sm text-sm text-center" style="width: 5rem;">
                         </div>
                     </div>
                     <!-- Non-linear Growth -->
@@ -309,7 +316,7 @@
                         <label for="paramBeta" class="block text-sm font-medium text-gray-600" data-tooltip-content="The non-linear growth parameter ($\beta_{NL}$) influences the local growth or decay of $u$. The $u(1-u)$ term is common in logistic growth models, where growth is limited as $u$ approaches 1. This parameter represents the non-linear reaction term, conceptually similar to non-linear advection in fluid dynamics.">Non-linear Growth ($\beta_{NL}$):</label>
                         <div class="flex items-center gap-x-3 mt-1">
                             <input type="range" id="paramBeta" min="0" max="2" step="0.05" value="0.5" class="w-full">
-                            <input type="number" id="inputBeta" min="0" max="2" step="0.05" value="0.50" class="w-20 p-1 border border-gray-300 rounded-md shadow-sm text-sm text-center">
+                            <input type="number" id="inputBeta" min="0" max="2" step="0.05" value="0.50" class="p-1 border border-gray-300 rounded-md shadow-sm text-sm text-center" style="width: 5rem;">
                         </div>
                     </div>
                     <!-- Cubic Damping -->
@@ -317,7 +324,7 @@
                         <label for="paramGamma" class="block text-sm font-medium text-gray-600" data-tooltip-content="The cubic damping parameter ($\gamma_{diss}$) further limits the growth of $u$, especially at higher values. It can stabilize solutions or lead to different pattern formations. This parameter represents a form of dissipation or energy removal.">Cubic Damping ($\gamma_{diss}$):</label>
                         <div class="flex items-center gap-x-3 mt-1">
                             <input type="range" id="paramGamma" min="0" max="1" step="0.01" value="0.2" class="w-full">
-                            <input type="number" id="inputGamma" min="0" max="1" step="0.01" value="0.20" class="w-20 p-1 border border-gray-300 rounded-md shadow-sm text-sm text-center">
+                            <input type="number" id="inputGamma" min="0" max="1" step="0.01" value="0.20" class="p-1 border border-gray-300 rounded-md shadow-sm text-sm text-center" style="width: 5rem;">
                         </div>
                     </div>
                     <!-- Initial Condition -->
@@ -341,16 +348,16 @@
                 <div class="mt-6">
                     <h3 class="text-lg font-semibold text-gray-700 mb-3">Simulation Presets:</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <button id="presetDiffusion" class="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150 h-10" title="Demonstrates pure diffusion">
+                        <button id="presetDiffusion" class="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150 h-10" data-tooltip-content="Demonstrates pure diffusion, where the initial profile smooths out over time due to the viscosity-like term.">
                             Pure Diffusion
                         </button>
-                        <button id="presetGrowthDecay" class="px-4 py-2 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150 h-10" title="Highlights non-linear growth and damping">
+                        <button id="presetGrowthDecay" class="px-4 py-2 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150 h-10" data-tooltip-content="Highlights the non-linear growth and damping terms, showing how values can grow and then stabilize or decay.">
                             Growth & Decay
                         </button>
-                        <button id="presetWave" class="px-4 py-2 bg-purple-600 text-white font-semibold rounded-lg shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition ease-in-out duration-150 h-10" title="Visualizes a propagating wave">
+                        <button id="presetWave" class="px-4 py-2 bg-purple-600 text-white font-semibold rounded-lg shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition ease-in-out duration-150 h-10" data-tooltip-content="Visualizes a traveling wave front, where a step-like initial condition propagates across the domain.">
                             Propagating Wave
                         </button>
-                        <button id="presetPattern" class="px-4 py-2 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150 h-10" title="Shows emergent pattern formation">
+                        <button id="presetPattern" class="px-4 py-2 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150 h-10" data-tooltip-content="Shows how complex, stable spatial patterns can emerge from a random initial state due to the interplay of all terms.">
                             Pattern Formation
                         </button>
                     </div>
@@ -381,7 +388,7 @@
                 </div>
                 <div class="flex justify-around gap-4 mt-4">
                     <button id="btnHelp" class="flex-1 px-4 py-2 bg-gray-600 text-white font-semibold rounded-lg shadow-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150 h-10 flex items-center justify-center" title="How to Interpret the Dashboard">
-                        How to Interpret
+                        How to Interpret this Dashboard
                     </button>
                 </div>
             </div>
@@ -547,12 +554,30 @@
             </div>
         </div>
     </div>
+    
+    <!-- Footer -->
+    <footer class="mt-8 text-center text-xs text-gray-600" style="font-size: 8pt;">
+        <p>
+            Q U A N T U M &nbsp; Q &nbsp; P T E &nbsp; L T D
+            <span class="mx-2">//</span>
+            U E N   2 0 2 4 3 3 9 9 2 N
+            <span class="mx-2">//</span>
+            2 0 2 5 ©
+            <span class="mx-2">//</span>
+            + 6 5   8 6 1 6 6 0 0 8
+            <span class="mx-2">//</span>
+            <a href="mailto:information@quantumq.net" class="hover:text-indigo-600">✉️ E - M A I L</a>
+            <span class="mx-2">//</span>
+            <a href="#" id="legalLink" class="hover:text-indigo-600">LEGAL</a>
+        </p>
+    </footer>
 
-    <!-- Modals (Help and AI Interpretation) -->
+
+    <!-- Modals (Help, Legal, and AI Interpretation) -->
     <div id="interpretationModal" class="modal">
         <div class="modal-content">
             <span class="close-button">&times;</span>
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">How to Read and Interpret the 1D Fluid Dynamics Analogue Simulator</h2>
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">How to Interpret this Dashboard</h2>
             
             <h3 class="text-xl font-semibold text-gray-700 mb-2">1. Understanding this Simulator's Purpose</h3>
             <p class="mb-4 text-gray-700">
@@ -618,6 +643,45 @@
             <p class="text-gray-700 italic">
                 This tool serves as a versatile platform for understanding fundamental PDE concepts and exploring various dynamic behaviors.
             </p>
+        </div>
+    </div>
+
+    <div id="legalModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Legal Disclaimers & Terms of Use</h2>
+            
+            <h3 class="text-lg font-semibold text-gray-700 mb-2">1. Experimental Research Tool</h3>
+            <p class="mb-4 text-gray-700 text-sm">
+                This 1D Fluid Dynamics Analogue Simulator (the "Tool") is provided by Quantum Q PTE. LTD. ("Quantum Q") as an experimental research and educational tool. It is intended solely for use by the scientific, mathematical, and engineering communities for conceptual exploration and educational purposes. The Tool is not designed, certified, or intended for use in any commercial, industrial, clinical, or mission-critical applications.
+            </p>
+
+            <h3 class="text-lg font-semibold text-gray-700 mb-2">2. No Warranty</h3>
+            <p class="mb-4 text-gray-700 text-sm">
+                THE TOOL IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL QUANTUM Q, ITS DIRECTORS, EMPLOYEES, OR AFFILIATES BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE TOOL OR THE USE OR OTHER DEALINGS IN THE TOOL.
+            </p>
+
+            <h3 class="text-lg font-semibold text-gray-700 mb-2">3. Limitation of Liability</h3>
+            <p class="mb-4 text-gray-700 text-sm">
+                You expressly understand and agree that Quantum Q shall not be liable for any direct, indirect, incidental, special, consequential, or exemplary damages, including but not limited to, damages for loss of profits, goodwill, use, data, or other intangible losses (even if Quantum Q has been advised of the possibility of such damages), resulting from the use or the inability to use the Tool. The entire risk as to the quality and performance of the Tool is with you. Should the Tool prove defective, you assume the cost of all necessary servicing, repair, or correction.
+            </p>
+
+            <h3 class="text-lg font-semibold text-gray-700 mb-2">4. No Guarantee of Accuracy</h3>
+            <p class="mb-4 text-gray-700 text-sm">
+                While efforts have been made to ensure the mathematical and numerical integrity of the simulation, Quantum Q makes no guarantee as to the accuracy, reliability, or completeness of the results generated by the Tool. The outputs are for illustrative and conceptual purposes only and should not be used for peer-reviewed publications, engineering design, or any other formal application without independent verification and validation. As stated prominently within the Tool, this simulator is an *analogue* and is not a direct simulation of the 3D Navier-Stokes equations.
+            </p>
+
+            <h3 class="text-lg font-semibold text-gray-700 mb-2">5. Intellectual Property</h3>
+            <p class="mb-4 text-gray-700 text-sm">
+                All rights, title, and interest in and to the Tool, including its source code, design, and branding, are the exclusive property of Quantum Q PTE. LTD. You may not copy, modify, distribute, sell, or lease any part of our Tool or its included software, nor may you reverse engineer or attempt to extract the source code of that software, unless laws prohibit those restrictions or you have our written permission.
+            </p>
+
+            <h3 class="text-lg font-semibold text-gray-700 mb-2">6. Governing Law & Jurisdiction</h3>
+            <p class="mb-4 text-gray-700 text-sm">
+                These terms shall be governed by and construed in accordance with the laws of the Republic of Singapore, without regard to its conflict of law provisions. Any disputes arising out of or in connection with these terms shall be subject to the exclusive jurisdiction of the courts of the Republic of Singapore.
+            </p>
+            
+            <p class="text-gray-600 text-xs italic mt-6">By using this Tool, you acknowledge that you have read, understood, and agree to be bound by these terms and disclaimers.</p>
         </div>
     </div>
 
@@ -911,11 +975,14 @@
                     tabTimeEvolution: document.getElementById('tabTimeEvolution'),
                     tabAnalysis: document.getElementById('tabAnalysis'),
                     interpretationModal: document.getElementById('interpretationModal'),
+                    legalModal: document.getElementById('legalModal'),
                     closeModalButton: document.querySelector('#interpretationModal .close-button'),
+                    closeLegalModalButton: document.querySelector('#legalModal .close-button'),
                     aiInterpretationModal: document.getElementById('aiInterpretationModal'), // New AI modal
                     closeAiInterpretationModal: document.getElementById('closeAiInterpretationModal'), // New AI modal close
                     aiInterpretationContent: document.getElementById('aiInterpretationContent'), // New AI modal content
                     aiProgressMessage: document.getElementById('aiProgressMessage'), // NEW: AI progress message
+                    legalLink: document.getElementById('legalLink'),
                     
                     // New metric display elements
                     metricMaxVal_current: document.getElementById('metricMaxVal_current'),
@@ -1104,10 +1171,16 @@
 
                 // Modals
                 if (this.elements.closeModalButton) this.elements.closeModalButton.onclick = () => this.hideModal('interpretationModal');
+                if (this.elements.closeLegalModalButton) this.elements.closeLegalModalButton.onclick = () => this.hideModal('legalModal');
                 if (this.elements.closeAiInterpretationModal) this.elements.closeAiInterpretationModal.onclick = () => this.hideModal('aiInterpretationModal');
+                if (this.elements.legalLink) this.elements.legalLink.onclick = (e) => { e.preventDefault(); this.showModal('legalModal'); };
+
                 window.onclick = (event) => {
                     if (this.elements.interpretationModal && event.target === this.elements.interpretationModal) {
                         this.hideModal('interpretationModal');
+                    }
+                    if (this.elements.legalModal && event.target === this.elements.legalModal) {
+                        this.hideModal('legalModal');
                     }
                     if (this.elements.aiInterpretationModal && event.target === this.elements.aiInterpretationModal) {
                         this.hideModal('aiInterpretationModal');
@@ -2235,11 +2308,11 @@
                                 <p class="text-gray-600" data-tooltip-content="The minimum value of $u(x,t)$ observed across the spatial domain at the final time step.">Min Value ($u_{min}$): <span id="finalMetricMinVal">${this.elements.metricMinVal_current.textContent}</span></p>
                             </div>
                             <div>
-                                <p class="text-gray-600" data-tooltip-content="The average value of $u(x,t)$ across the spatial domain at the final time step.">Mean Value ($\overline{u}$): <span id="finalMetricMeanVal">${this.elements.metricMeanVal_current.textContent}</span></p>
-                                <p class="text-gray-600" data-tooltip-content="Measures the spread or variability of $u(x,t)$ values across the domain at the final time step. Higher values indicate more spatial heterogeneity.">Standard Deviation ($\sigma_u$): <span id="finalMetricStdDev">${this.elements.metricStdDev_current.textContent}</span></p>
+                                <p class="text-gray-600" data-tooltip-content="The average value of $u(x,t)$ across the spatial domain at the final time step.">Mean Value ($\\overline{u}$): <span id="finalMetricMeanVal">${this.elements.metricMeanVal_current.textContent}</span></p>
+                                <p class="text-gray-600" data-tooltip-content="Measures the spread or variability of $u(x,t)$ values across the domain at the final time step. Higher values indicate more spatial heterogeneity.">Standard Deviation ($\\sigma_u$): <span id="finalMetricStdDev">${this.elements.metricStdDev_current.textContent}</span></p>
                             </div>
                             <div class="col-span-full">
-                                <p class="text-gray-600" data-tooltip-content="Defined as $\mathcal{E} = \int_0^L u(x,t)^2 dx$. Represents a form of 'total activity' or 'content' in the system at the final time step.">Energy ($\mathcal{E}$): <span id="finalMetricEnergy">${this.elements.metricEnergy_current.textContent}</span></p>
+                                <p class="text-gray-600" data-tooltip-content="Defined as $\\mathcal{E} = \\int_0^L u(x,t)^2 dx$. Represents a form of 'total activity' or 'content' in the system at the final time step.">Energy ($\\mathcal{E}$): <span id="finalMetricEnergy">${this.elements.metricEnergy_current.textContent}</span></p>
                             </div>
                         </div>
                     </div>
