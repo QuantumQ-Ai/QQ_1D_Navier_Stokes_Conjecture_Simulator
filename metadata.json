@@ -1,0 +1,5 @@
+{
+  "name": "1D Fluid Dynamics Analogue Simulator",
+  "description": "An interactive simulator for a 1D Reaction-Diffusion PDE, designed for conceptual exploration of phenomena like diffusion, non-linear growth, and pattern formation, with AI-powered analysis features.",
+  "requestFramePermissions": []
+}
