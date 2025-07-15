@@ -853,25 +853,6 @@
                 }
             }
 
-            async run(progressCallback) {
-                const n_steps = Math.floor(this.T / this.dt);
-                const snapshot_interval = Math.max(1, Math.floor(n_steps / 100));
-
-                for (let i = 1; i <= n_steps; i++) {
-                    this.step();
-                    if (i % snapshot_interval === 0 || i === n_steps) {
-                        this.snapshots.push(Array.from(this.u));
-                        this.timeSteps.push(i * this.dt);
-                    }
-                    if (progressCallback) {
-                        progressCallback(i / n_steps);
-                    }
-                    if (i % 50 === 0) {
-                        await new Promise(resolve => setTimeout(resolve, 0));
-                    }
-                }
-            }
-
             analyzeResults(u_array = this.u) {
                 const current_state = u_array;
                 const max_value = Math.max(...current_state);
@@ -934,9 +915,9 @@
             }
 
             calculate_du_dt_total(u_array) {
+                const du_dt_total = new Float64Array(this.N);
                 const du_dt_diff = this.diffusionTerm(u_array);
                 const du_dt_react = this.reactionTerm(u_array);
-                const du_dt_total = new Float64Array(this.N);
                 for (let i = 0; i < this.N; i++) {
                     du_dt_total[i] = du_dt_diff[i] + du_dt_react[i];
                 }
@@ -965,6 +946,7 @@
                 this.tooltipsEnabled = false;
                 this.hasSimulationData = false;
                 this.isDetailedTableVisible = false;
+                this.animationFrameId = null;
 
                 this.meanValueHistory = [];
                 this.energyHistory = [];
@@ -1409,7 +1391,7 @@
                                     title: { display: true, text: (config.id === 'livePlotCanvas') ? 'u(x,t)' : config.title.replace(' Over Time', '') },
                                     min: config.yMin,
                                     max: config.yMax,
-                                    beginAtZero: true
+                                    beginAtZero: config.yMin >= 0
                                 }
                             },
                             plugins: {
@@ -1433,17 +1415,15 @@
 
                 const currentResults = this.simulator.analyzeResults(u_array);
 
-                if (this.isSimulationRunning && !this.isSimulationPaused) {
-                    this.meanValueHistory.push(currentResults.mean_value);
-                    this.energyHistory.push(currentResults.energy);
-                    this.timeLabels.push(time);
-                    
-                    this.maxMaxVal = Math.max(this.maxMaxVal, currentResults.max_value);
-                    this.minMinVal = Math.min(this.minMinVal, currentResults.min_value);
-                    this.maxMeanVal = Math.max(this.maxMeanVal, currentResults.mean_value);
-                    this.maxStdDev = Math.max(this.maxStdDev, currentResults.std_dev);
-                    this.maxEnergy = Math.max(this.maxEnergy, currentResults.energy);
-                }
+                this.meanValueHistory.push(currentResults.mean_value);
+                this.energyHistory.push(currentResults.energy);
+                this.timeLabels.push(time);
+                
+                this.maxMaxVal = Math.max(this.maxMaxVal, currentResults.max_value);
+                this.minMinVal = Math.min(this.minMinVal, currentResults.min_value);
+                this.maxMeanVal = Math.max(this.maxMeanVal, currentResults.mean_value);
+                this.maxStdDev = Math.max(this.maxStdDev, currentResults.std_dev);
+                this.maxEnergy = Math.max(this.maxEnergy, currentResults.energy);
 
                 this.elements.metricMaxVal_current.textContent = currentResults.max_value.toFixed(4);
                 this.elements.metricMaxVal_max.textContent = this.maxMaxVal.toFixed(4);
@@ -1472,7 +1452,7 @@
                 ['metricMaxVal_current', 'metricMaxVal_max', 'metricMinVal_current', 'metricMinVal_min',
                  'metricMeanVal_current', 'metricMeanVal_max', 'metricStdDev_current', 'metricStdDev_max',
                  'metricEnergy_current', 'metricEnergy_max'].forEach(id => {
-                    this.elements[id].textContent = '0.0000';
+                    if(this.elements[id]) this.elements[id].textContent = '0.0000';
                 });
             }
 
@@ -1487,13 +1467,13 @@
                     this.meanValChart.data.labels = this.timeLabels;
                     this.meanValChart.data.datasets[0].data = this.meanValueHistory;
                     this.meanValChart.options.scales.y.max = getChartYMax(this.meanValueHistory);
-                    this.meanValChart.update();
+                    this.meanValChart.update('none');
                 }
                 if (this.energyChart) {
                     this.energyChart.data.labels = this.timeLabels;
                     this.energyChart.data.datasets[0].data = this.energyHistory;
                     this.energyChart.options.scales.y.max = getChartYMax(this.energyHistory);
-                    this.energyChart.update();
+                    this.energyChart.update('none');
                 }
             }
 
@@ -1572,98 +1552,102 @@
                     presetButtons.forEach(btn => setButtonState(btn, !this.hasSimulationData));
                 }
             }
+            
+            animationStep() {
+                if (this.isSimulationPaused) {
+                    return; // Loop is paused
+                }
 
+                if (!this.isSimulationRunning) {
+                    // Finalization logic
+                    this.hasSimulationData = true;
+                    this.updateButtonStates();
+                    this.updateLiveSimulationTitle();
+                    this.showDetailedResults();
+                    
+                    if (this.elements.playbackSlider) {
+                        this.elements.playbackSlider.max = this.simulator.T;
+                        this.elements.playbackSlider.value = this.currentSimStep * this.simulator.dt;
+                        this.elements.playbackCurrentTime.textContent = `Time: ${(this.currentSimStep * this.simulator.dt).toFixed(2)}s`;
+                        this.elements.playbackTotalTime.textContent = `Total: ${this.simulator.T.toFixed(2)}s`;
+                        this.updateSliderTrackColor(this.elements.playbackSlider);
+                    }
+                    return;
+                }
 
-            async runSimulationLoop() {
-                if (!this.simulator) return;
-                
-                this.isSimulationRunning = true;
-                this.isSimulationPaused = false;
-                this.updateButtonStates();
-                this.updateLiveSimulationTitle();
-
-                this.liveChart.data.labels = this.simulator.x.map(val => val.toFixed(2));
-                
                 const n_steps = Math.floor(this.simulator.T / this.simulator.dt);
-                const snapshot_interval = Math.max(1, Math.floor(n_steps / 100));
+                const stepsPerFrame = 2; // Run 2 sim steps per screen refresh for speed
 
-                const loop = async (i) => {
-                    if (!this.isSimulationRunning) {
-                        this.hasSimulationData = true;
-                        this.updateMetricsDisplay(this.simulator.u, this.simulator.timeSteps[this.simulator.timeSteps.length - 1] || this.simulator.T);
-                        this.showDetailedResults();
-                        this.updateButtonStates();
-                        this.updateLiveSimulationTitle();
-                        if (this.elements.playbackSlider) {
-                            this.elements.playbackSlider.max = this.simulator.T;
-                            this.elements.playbackSlider.value = this.simulator.T;
-                            this.elements.playbackCurrentTime.textContent = `Time: ${this.simulator.T.toFixed(2)}s`;
-                            this.elements.playbackTotalTime.textContent = `Total: ${this.simulator.T.toFixed(2)}s`;
-                            this.updateSliderTrackColor(this.elements.playbackSlider);
-                        }
-                        return;
+                for (let k = 0; k < stepsPerFrame; k++) {
+                    if (this.currentSimStep >= n_steps) {
+                        this.isSimulationRunning = false;
+                        break;
                     }
-                    if (this.isSimulationPaused) {
-                        requestAnimationFrame(() => loop(i));
-                        return;
-                    }
-                    
+
                     this.simulator.step();
-                    this.currentSimStep = i;
-                    const currentTime = i * this.simulator.dt;
+                    this.currentSimStep++;
+                    
+                    const currentTime = this.currentSimStep * this.simulator.dt;
+                    const currentU = Array.from(this.simulator.u);
+                    
+                    // Update history for metric charts on every sim step for smoothness
+                    this.updateMetricsDisplay(currentU, currentTime);
 
-                    if (i % snapshot_interval === 0 || i === n_steps) {
-                        this.simulator.snapshots.push(Array.from(this.simulator.u));
+                    // Save snapshots for playback periodically
+                    const snapshot_interval = Math.max(1, Math.floor(n_steps / 100)); // ~100 snapshots
+                    if (this.currentSimStep % snapshot_interval === 0 || this.currentSimStep === n_steps) {
+                        this.simulator.snapshots.push(currentU);
                         this.simulator.timeSteps.push(currentTime);
-                        this.updateMetricsDisplay(this.simulator.u, currentTime);
-                    }
-
-                    const progressPercent = (this.currentSimStep / n_steps) * 100;
-                    this.elements.progressBar.style.width = `${progressPercent}%`;
-                    this.elements.percentageCounter.textContent = `${progressPercent.toFixed(0)}%`;
-                    this.liveChart.data.datasets[0].data = Array.from(this.simulator.u);
-                    this.liveChart.update();
-                    this.updateLiveDataTable(this.simulator.u);
-                    
-                    if (i >= n_steps) {
-                         this.isSimulationRunning = false;
-                         loop(i); // one final call to enter the stop logic
-                         return;
-                    }
-                    
-                    // Yield to browser every few steps to prevent UI freeze
-                    if (i % 20 === 0) {
-                        setTimeout(() => loop(i + 1), 0);
-                    } else {
-                        loop(i + 1);
                     }
                 }
+
+                // --- UI updates that only need to run once per frame ---
+                const progressPercent = Math.min(100, (this.currentSimStep / n_steps) * 100);
+                this.elements.progressBar.style.width = `${progressPercent}%`;
+                this.elements.percentageCounter.textContent = `${progressPercent.toFixed(0)}%`;
+
+                this.liveChart.data.datasets[0].data = Array.from(this.simulator.u);
+                this.liveChart.update('none'); // Update live chart without animation
+
+                this.updateLiveDataTable(this.simulator.u);
                 
-                loop(this.currentSimStep + 1);
+                // Schedule next frame
+                this.animationFrameId = requestAnimationFrame(this.animationStep.bind(this));
             }
 
             handleRunStop() {
                 if (this.isSimulationRunning) {
                     this.isSimulationRunning = false;
-                    this.isSimulationPaused = false;
+                    // The animation loop will see the flag and run the finalization logic on its next cycle.
                 } else {
                     if (this.currentSimStep === 0) {
                         this.refreshApplication(true);
                     }
-                    setTimeout(() => this.runSimulationLoop(), 10); // Use timeout to allow UI to update
+                    this.isSimulationRunning = true;
+                    this.isSimulationPaused = false;
+                    // Start the animation loop
+                    this.animationFrameId = requestAnimationFrame(this.animationStep.bind(this));
                 }
-                 // Immediate update to show "Stop" button
                 this.updateButtonStates();
             }
 
             handlePauseResume() {
-                if (this.isSimulationRunning) {
-                    this.isSimulationPaused = !this.isSimulationPaused;
+                if (!this.isSimulationRunning) return;
+
+                this.isSimulationPaused = !this.isSimulationPaused;
+
+                if (!this.isSimulationPaused) {
+                    // Resuming, kick off the loop again
+                    this.animationFrameId = requestAnimationFrame(this.animationStep.bind(this));
                 }
                 this.updateButtonStates();
             }
 
             refreshApplication(keepPresetName = false) {
+                if (this.animationFrameId) {
+                    cancelAnimationFrame(this.animationFrameId);
+                    this.animationFrameId = null;
+                }
                 this.isSimulationRunning = false;
                 this.isSimulationPaused = false;
                 this.currentSimStep = 0;
@@ -1690,6 +1674,18 @@
                 }
 
                 this.initializeCharts(); // Re-initialize charts
+                
+                // Set a fixed x-axis for time-series charts for smooth plotting
+                if (this.meanValChart) {
+                    this.meanValChart.options.scales.x.max = this.simulator.T;
+                }
+                if (this.energyChart) {
+                    this.energyChart.options.scales.x.max = this.simulator.T;
+                }
+
+                if (this.liveChart.data.labels) {
+                    this.liveChart.data.labels = this.simulator.x.map(val => val.toFixed(2));
+                }
                 this.updateLiveDataTable(this.simulator.u); // Update table with initial state
                 
                 this.updateButtonStates();
@@ -1794,8 +1790,28 @@
                 const selectedSnapshot = this.simulator.snapshots[snapshotIndex];
 
                 this.liveChart.data.datasets[0].data = selectedSnapshot;
-                this.liveChart.update();
+                this.liveChart.update('none');
                 this.updateLiveDataTable(selectedSnapshot);
+
+                // Update time-series charts to match the scrub position
+                if (this.meanValChart && this.energyChart && this.timeLabels.length > 0) {
+                    let timeIndex = this.timeLabels.findIndex(t => t > currentTime);
+                    if (timeIndex === -1) {
+                        timeIndex = this.timeLabels.length;
+                    }
+
+                    const timeSubset = this.timeLabels.slice(0, timeIndex);
+                    const meanSubset = this.meanValueHistory.slice(0, timeIndex);
+                    const energySubset = this.energyHistory.slice(0, timeIndex);
+
+                    this.meanValChart.data.labels = timeSubset;
+                    this.meanValChart.data.datasets[0].data = meanSubset;
+                    this.meanValChart.update('none');
+
+                    this.energyChart.data.labels = timeSubset;
+                    this.energyChart.data.datasets[0].data = energySubset;
+                    this.energyChart.update('none');
+                }
             }
 
             findSnapshotIndexForTime(time) {
