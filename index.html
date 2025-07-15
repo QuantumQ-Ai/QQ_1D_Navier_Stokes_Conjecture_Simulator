@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>1D Fluid Dynamics Analogue Simulator v29</title>
+    <title>1D Fluid Dynamics Analogue Simulator v28</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js CDN for plotting -->
@@ -236,7 +236,7 @@
             pointer-events: none; /* Do not block mouse events on elements below */
             opacity: 0;
             transition: opacity 0.2s ease-in-out;
-            /* Removed transform for more precise JS positioning */
+            transform: translate(-50%, -110%); /* Adjust position relative to cursor */
         }
         #dynamicTooltip.show {
             opacity: 1;
@@ -249,12 +249,6 @@
         #detailedDataTableContainer th,
         #detailedDataTableContainer td {
             width: 50%; /* Distribute width equally between two columns */
-        }
-
-        /* Style for disabled playback controls */
-        .playback-disabled {
-            opacity: 0.5;
-            pointer-events: none;
         }
     </style>
 </head>
@@ -464,9 +458,9 @@
                 </div>
 
                 <!-- NEW: Simulation Playback Controls -->
-                <div id="playbackControls" class="mt-6 bg-white rounded-lg p-4 shadow-inner border border-gray-300 playback-disabled">
+                <div id="playbackControls" class="mt-6 bg-white rounded-lg p-4 shadow-inner border border-gray-300 hidden">
                     <h3 class="text-lg font-semibold text-gray-700 mb-3">Simulation Playback</h3>
-                    <input type="range" id="playbackSlider" min="0" max="1" step="any" value="0" class="w-full h-2 rounded-lg appearance-none cursor-pointer" disabled>
+                    <input type="range" id="playbackSlider" min="0" max="1" step="any" value="0" class="w-full h-2 rounded-lg appearance-none cursor-pointer">
                     <div class="flex justify-between text-xs text-gray-500 mt-1">
                         <span id="playbackCurrentTime">Time: 0.00s</span>
                         <span id="playbackTotalTime">Total: 0.00s</span>
@@ -566,15 +560,15 @@
         <p>
             Q U A N T U M &nbsp; Q &nbsp; P T E &nbsp; L T D
             <span class="mx-2">//</span>
-            U E N &nbsp; 2 0 2 4 3 3 9 9 2 N
+            U E N   2 0 2 4 3 3 9 9 2 N
             <span class="mx-2">//</span>
-            <a href="mailto:information@quantumq.net" class="text-blue-800 hover:text-indigo-600">✉️ E - M A I L</a>
+            2 0 2 5 ©
+            <span class="mx-2">//</span>
+            <a href="mailto:information@quantumq.net" class="hover:text-indigo-600">✉️ E - M A I L</a>
             <span class="mx-2">//</span>
             <a href="#" id="acknowledgementsLink" class="hover:text-indigo-600">ACKNOWLEDGEMENTS</a>
             <span class="mx-2">//</span>
             <a href="#" id="legalLink" class="hover:text-indigo-600">LEGAL</a>
-            <span class="mx-2">//</span>
-            2 0 2 5 &copy;
         </p>
     </footer>
 
@@ -703,7 +697,7 @@
             <h2 class="text-2xl font-bold text-gray-800 mb-4">Legal Disclaimers & Terms of Use</h2>
             
             <h3 class="text-lg font-semibold text-gray-700 mb-2">1. Experimental Research Tool</h3>
-            <p class="mb-o4 text-gray-700 text-sm">
+            <p class="mb-4 text-gray-700 text-sm">
                 This 1D Fluid Dynamics Analogue Simulator (the "Tool") is provided by Quantum Q PTE. LTD. ("Quantum Q") as an experimental research and educational tool. It is intended solely for use by the scientific, mathematical, and engineering communities for conceptual exploration and educational purposes. The Tool is not designed, certified, or intended for use in any commercial, industrial, clinical, or mission-critical applications.
             </p>
 
@@ -732,11 +726,6 @@
                 These terms shall be governed by and construed in accordance with the laws of the Republic of Singapore, without regard to its conflict of law provisions. Any disputes arising out of or in connection with these terms shall be subject to the exclusive jurisdiction of the courts of the Republic of Singapore.
             </p>
             
-            <h3 class="text-lg font-semibold text-gray-700 mb-2">7. International Applicability and English Law</h3>
-            <p class="mb-4 text-gray-700 text-sm">
-                While the primary governing law is that of the Republic of Singapore, these terms are intended to be broadly applicable to users globally. For users in jurisdictions where English law is applicable or preferred, these terms shall be interpreted in a manner consistent with the general principles of English contract law, to the extent that such interpretation does not conflict with the mandatory laws of Singapore. The parties acknowledge and agree that the principles of common law and equity, as applied in English law, may be considered in interpreting these terms where Singapore law is silent or where such principles provide additional clarity, provided always that Singapore law remains the ultimate governing law.
-            </p>
-
             <p class="text-gray-600 text-xs italic mt-6">By using this Tool, you acknowledge that you have read, understood, and agree to be bound by these terms and disclaimers.</p>
         </div>
     </div>
@@ -830,6 +819,7 @@
                 this.timeSteps.push(0.0);
             }
 
+            // Modified to accept an optional u_array for calculations on snapshots
             diffusionTerm(u_array = this.u) {
                 const u_xx = new Float64Array(this.N);
                 // Central difference with periodic boundary conditions
@@ -841,13 +831,14 @@
                 return u_xx.map(val => this.nu_eff * val);
             }
 
+            // Modified to accept an optional u_array for calculations on snapshots
             reactionTerm(u_array = this.u) {
                 return u_array.map(val => this.beta_NL * val * (1 - val) - this.gamma_diss * Math.pow(val, 3));
             }
 
             step() {
-                const du_dt_diff = this.diffusionTerm();
-                const du_dt_react = this.reactionTerm();
+                const du_dt_diff = this.diffusionTerm(); // Uses this.u by default
+                const du_dt_react = this.reactionTerm(); // Uses this.u by default
                 
                 for (let i = 0; i < this.N; i++) {
                     this.u[i] += (du_dt_diff[i] + du_dt_react[i]) * this.dt;
@@ -863,7 +854,7 @@
 
                 for (let i = 1; i <= n_steps; i++) {
                     this.step();
-                    if (i % snapshot_interval === 0 || i === n_steps) {
+                    if (i % snapshot_interval === 0 || i === n_steps) { // Ensure final state is always saved
                         this.snapshots.push(Array.from(this.u));
                         this.timeSteps.push(i * this.dt);
                     }
@@ -876,6 +867,7 @@
                 }
             }
 
+            // Modified to accept an optional u_array for calculations on snapshots
             analyzeResults(u_array = this.u) {
                 const current_state = u_array;
                 const max_value = Math.max(...current_state);
@@ -915,6 +907,7 @@
                 document.body.removeChild(link);
             }
 
+            // NEW: Methods for derived quantities, now accepting u_array
             calculate_du_dx(u_array) {
                 const du_dx = new Float64Array(this.N);
                 for (let i = 0; i < this.N; i++) {
@@ -963,37 +956,41 @@
                 this.liveChart = null;
                 this.finalStateChart = null;
                 this.timeEvolutionChart = null;
-                this.meanValChart = null;
-                this.energyChart = null;
+                this.meanValChart = null; // New chart for mean value
+                this.energyChart = null;   // New chart for energy
                 this.currentActiveTab = 'finalState';
-                this.geminiApiKey = "";
-                this.isSimulationRunning = false;
-                this.isSimulationPaused = false;
-                this.currentSimStep = 0;
-                this.currentPresetName = "Custom";
-                this.currentTableDisplayMode = 'u';
-                this.tooltipsEnabled = false;
-                this.hasSimulationData = false;
-                this.isDetailedTableVisible = false;
+                this.geminiApiKey = ""; // Store the API key from the input
+                this.isSimulationRunning = false; // Track simulation state
+                this.isSimulationPaused = false; // Track pause state
+                this.currentSimStep = 0; // Track current simulation step for progress bar
+                this.currentPresetName = "Custom"; // Track the current preset name or 'Custom'
+                this.currentTableDisplayMode = 'u'; // NEW: Default table display mode
+                this.tooltipsEnabled = false; // NEW: State for dashboard-wide tooltips
+                this.hasSimulationData = false; // NEW: Track if a simulation has been run/stopped
+                this.isDetailedTableVisible = false; // NEW: State for detailed table visibility
 
+                // Metric data
                 this.meanValueHistory = [];
                 this.energyHistory = [];
                 this.timeLabels = [];
                 this.maxMaxVal = 0;
-                this.minMinVal = 1;
+                this.minMinVal = 1; // Assuming u is between 0 and 1
                 this.maxMeanVal = 0;
                 this.maxStdDev = 0;
                 this.maxEnergy = 0;
 
                 this.chartStates = {}; 
 
+                // Initialize elements that are always present in the DOM
                 this.elements = {
+                    // Parameter Sliders
                     paramL: document.getElementById('paramL'),
                     paramN: document.getElementById('paramN'),
                     paramT: document.getElementById('paramT'),
                     paramAlpha: document.getElementById('paramAlpha'),
                     paramBeta: document.getElementById('paramBeta'),
                     paramGamma: document.getElementById('paramGamma'),
+                    // Parameter Inputs
                     inputL: document.getElementById('inputL'),
                     inputN: document.getElementById('inputN'),
                     inputT: document.getElementById('inputT'),
@@ -1004,21 +1001,21 @@
                     paramInit: document.getElementById('paramInit'),
                     
                     btnRun: document.getElementById('btnRun'),
-                    btnRunContent: document.getElementById('btnRunContent'),
-                    btnPauseResume: document.getElementById('btnPauseResume'),
-                    btnRefresh: document.getElementById('btnRefresh'),
+                    btnRunContent: document.getElementById('btnRunContent'), // Reference to the span inside btnRun
+                    btnPauseResume: document.getElementById('btnPauseResume'), // New pause/resume button
+                    btnRefresh: document.getElementById('btnRefresh'), // Renamed from btnReset
                     btnExport: document.getElementById('btnExport'),
                     btnHelp: document.getElementById('btnHelp'),
-                    btnResults: document.getElementById('btnResults'),
-                    btnInterpretKids: document.getElementById('btnInterpretKids'),
-                    btnQA: document.getElementById('btnQA'),
-                    btnConversation: document.getElementById('btnConversation'),
-                    navierStokesAudio: document.getElementById('navierStokesAudio'),
-                    geminiApiKeyInput: document.getElementById('geminiApiKeyInput'),
+                    btnResults: document.getElementById('btnResults'), // Updated ID
+                    btnInterpretKids: document.getElementById('btnInterpretKids'), // New kids' interpretation button
+                    btnQA: document.getElementById('btnQA'), // NEW: Q&A button
+                    btnConversation: document.getElementById('btnConversation'), // NEW: Conversation button
+                    navierStokesAudio: document.getElementById('navierStokesAudio'), // NEW: Audio element
+                    geminiApiKeyInput: document.getElementById('geminiApiKeyInput'), // API key input
 
                     progressBar: document.getElementById('progressBar'), 
                     livePlotCanvas: document.getElementById('livePlotCanvas'),
-                    detailedResultsContent: document.getElementById('detailedResultsContent'),
+                    detailedResultsContent: document.getElementById('detailedResultsContent'), // Changed ID
                     tabFinalState: document.getElementById('tabFinalState'),
                     tabTimeEvolution: document.getElementById('tabTimeEvolution'),
                     tabAnalysis: document.getElementById('tabAnalysis'),
@@ -1026,14 +1023,15 @@
                     legalModal: document.getElementById('legalModal'),
                     closeModalButton: document.querySelector('#interpretationModal .close-button'),
                     closeLegalModalButton: document.querySelector('#legalModal .close-button'),
-                    aiInterpretationModal: document.getElementById('aiInterpretationModal'),
-                    closeAiInterpretationModal: document.getElementById('closeAiInterpretationModal'),
-                    aiInterpretationContent: document.getElementById('aiInterpretationContent'),
-                    aiProgressMessage: document.getElementById('aiProgressMessage'),
+                    aiInterpretationModal: document.getElementById('aiInterpretationModal'), // New AI modal
+                    closeAiInterpretationModal: document.getElementById('closeAiInterpretationModal'), // New AI modal close
+                    aiInterpretationContent: document.getElementById('aiInterpretationContent'), // New AI modal content
+                    aiProgressMessage: document.getElementById('aiProgressMessage'), // NEW: AI progress message
                     legalLink: document.getElementById('legalLink'),
                     acknowledgementsLink: document.getElementById('acknowledgementsLink'),
                     getApiKeyLink: document.getElementById('getApiKeyLink'),
                     
+                    // New metric display elements
                     metricMaxVal_current: document.getElementById('metricMaxVal_current'),
                     metricMaxVal_max: document.getElementById('metricMaxVal_max'),
                     metricMinVal_current: document.getElementById('metricMinVal_current'),
@@ -1047,39 +1045,45 @@
                     meanValChartCanvas: document.getElementById('meanValChartCanvas'),
                     energyChartCanvas: document.getElementById('energyChartCanvas'),
 
+                    // New preset buttons
                     presetDiffusion: document.getElementById('presetDiffusion'),
                     presetGrowthDecay: document.getElementById('presetGrowthDecay'),
                     presetWave: document.getElementById('presetWave'),
                     presetPattern: document.getElementById('presetPattern'),
-                    simulationActivityIndicator: document.getElementById('simulationActivityIndicator'),
-                    percentageCounter: document.getElementById('percentageCounter'),
-                    liveSimSubtitle: document.getElementById('liveSimSubtitle'),
+                    simulationActivityIndicator: document.getElementById('simulationActivityIndicator'), // New element
+                    percentageCounter: document.getElementById('percentageCounter'), // New percentage counter
+                    liveSimSubtitle: document.getElementById('liveSimSubtitle'), // New subtitle for live simulation panel
                     
+                    // NEW: Live Data Points Table elements
                     simpleDataTableSummary: document.getElementById('simpleDataTableSummary'),
                     summaryU0: document.getElementById('summaryU0'),
                     summaryUL2: document.getElementById('summaryUL2'),
                     toggleDetailedTable: document.getElementById('toggleDetailedTable'),
                     detailedDataTableContainer: document.getElementById('detailedDataTableContainer'),
-                    liveDataTableBody: document.getElementById('liveDataTableBody'),
-                    tableDisplayMode: document.getElementById('tableDisplayMode'),
-                    liveTableValueHeader: document.getElementById('liveTableValueHeader'),
+                    liveDataTableBody: document.getElementById('liveDataTableBody'), // Live data table body
+                    tableDisplayMode: document.getElementById('tableDisplayMode'), // NEW: Table display mode dropdown
+                    liveTableValueHeader: document.getElementById('liveTableValueHeader'), // NEW: Table header for value column
                     
+                    // NEW: Playback controls
                     playbackControls: document.getElementById('playbackControls'),
                     playbackSlider: document.getElementById('playbackSlider'),
                     playbackCurrentTime: document.getElementById('playbackCurrentTime'),
                     playbackTotalTime: document.getElementById('playbackTotalTime'),
 
+                    // NEW: Tooltip elements
                     enableTooltips: document.getElementById('enableTooltips'),
                     dynamicTooltip: document.getElementById('dynamicTooltip'),
-                    mainContentArea: document.getElementById('mainContentArea')
+                    mainContentArea: document.getElementById('mainContentArea') // For event delegation
                 };
 
+                // Define activateTab as an arrow function property after elements are initialized
                 this.activateTab = (tabName) => {
                     [this.elements.tabFinalState, this.elements.tabTimeEvolution, this.elements.tabAnalysis].forEach(tab => {
                         tab.classList.remove('border-indigo-600', 'text-indigo-600');
                         tab.classList.add('border-transparent', 'text-gray-600');
                     });
 
+                    // Hide all content divs
                     const finalStateWrapper = document.getElementById('finalStateWrapper');
                     const timeEvolutionWrapper = document.getElementById('timeEvolutionWrapper');
                     const analysisDiv = document.getElementById('analysisContent');
@@ -1112,53 +1116,61 @@
                         }
                     }
 
+                    // Re-typeset MathJax for the active tab's content
                     if (targetElementForMathJax && typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
                         MathJax.typesetPromise([targetElementForMathJax]);
                     }
                 };
 
+                // Bind tooltip handlers
                 this._boundHandleTooltipShow = this.handleTooltipShow.bind(this);
                 this._boundHandleTooltipHide = this.handleTooltipHide.bind(this);
 
                 this.setupEventListeners();
                 this.updateAllSliderTrackColors();
-                this.initializeCharts();
-                this.resetMetricsDisplay();
-                this.updateButtonStates();
-                this.updateLiveSimulationTitle();
-                this.updateLiveDataTable();
+                this.initializeCharts(); // Initialize live chart and metric charts
+                this.resetMetricsDisplay(); // Reset metrics on load
+                this.updateButtonStates(); // Set initial button states
+                this.updateLiveSimulationTitle(); // Set initial title
+                this.updateLiveDataTable(); // Initialize live data table
             }
             
+            // NEW: Helper function to sync a slider with a number input
             setupSync(sliderId, inputId, fixedPoints = 0) {
                 const slider = document.getElementById(sliderId);
                 const input = document.getElementById(inputId);
                 if (!slider || !input) return;
 
+                // Event listener for slider movement
                 slider.oninput = () => {
                     input.value = parseFloat(slider.value).toFixed(fixedPoints);
                     this.updateSliderTrackColor(slider);
-                    this.currentPresetName = "Custom";
+                    this.currentPresetName = "Custom"; // Any manual change makes it custom
                     this.updateLiveSimulationTitle();
                 };
 
-                input.onchange = () => {
+                // Event listener for number input change
+                input.onchange = () => { // Using onchange is better for UX than oninput for text fields
                     let value = parseFloat(input.value);
                     const min = parseFloat(slider.min);
                     const max = parseFloat(slider.max);
                     
+                    // Validate and clamp the value
                     if (isNaN(value)) {
                         value = min;
                     }
                     value = Math.max(min, Math.min(max, value));
                     
+                    // Update both slider and input to be in sync
                     slider.value = value;
-                    input.value = value.toFixed(fixedPoints);
+                    input.value = value.toFixed(fixedPoints); // Re-format to ensure consistency
                     this.updateSliderTrackColor(slider);
                     this.currentPresetName = "Custom";
                     this.updateLiveSimulationTitle();
                 };
             }
 
+            // New helper function to update a single slider's track color
             updateSliderTrackColor(sliderElement) {
                 if (!sliderElement) return;
                 const value = parseFloat(sliderElement.value);
@@ -1168,6 +1180,7 @@
                 sliderElement.style.setProperty('--slider-value-percent', `${percentage}%`);
             }
             
+            // NEW: Helper to update all slider tracks on load
             updateAllSliderTrackColors() {
                 this.updateSliderTrackColor(this.elements.paramL);
                 this.updateSliderTrackColor(this.elements.paramN);
@@ -1178,6 +1191,7 @@
             }
 
             setupEventListeners() {
+                // Sync sliders and number inputs
                 this.setupSync('paramL', 'inputL', 1);
                 this.setupSync('paramN', 'inputN', 0);
                 this.setupSync('paramT', 'inputT', 1);
@@ -1185,29 +1199,28 @@
                 this.setupSync('paramBeta', 'inputBeta', 2);
                 this.setupSync('paramGamma', 'inputGamma', 2);
 
-                if (this.elements.paramInit) this.elements.paramInit.onchange = () => {
-                    this.currentPresetName = "Custom";
-                    this.updateLiveSimulationTitle();
-                };
-
+                // Buttons
                 if (this.elements.btnRun) this.elements.btnRun.onclick = () => this.handleRunStop();
                 if (this.elements.btnPauseResume) this.elements.btnPauseResume.onclick = () => this.handlePauseResume();
-                if (this.elements.btnRefresh) this.elements.btnRefresh.onclick = () => this.refreshApplication(false);
+                if (this.elements.btnRefresh) this.elements.btnRefresh.onclick = () => this.refreshApplication(false); // Explicitly reset to custom
                 if (this.elements.btnExport) this.elements.btnExport.onclick = () => this.exportData();
                 if (this.elements.btnHelp) this.elements.btnHelp.onclick = () => this.showModal('interpretationModal');
-                if (this.elements.btnResults) this.elements.btnResults.onclick = () => this.interpretSimulationState();
-                if (this.elements.btnInterpretKids) this.elements.btnInterpretKids.onclick = () => this.interpretSimulationStateForKids();
-                if (this.elements.btnQA) this.elements.btnQA.onclick = () => this.generateQA();
-                if (this.elements.btnConversation) this.elements.btnConversation.onclick = () => this.playConversationAudio();
+                if (this.elements.btnResults) this.elements.btnResults.onclick = () => this.interpretSimulationState(); // Updated ID
+                if (this.elements.btnInterpretKids) this.elements.btnInterpretKids.onclick = () => this.interpretSimulationStateForKids(); // NEW: Kids' interpretation button
+                if (this.elements.btnQA) this.elements.btnQA.onclick = () => this.generateQA(); // NEW: Q&A button event listener
+                if (this.elements.btnConversation) this.elements.btnConversation.onclick = () => this.playConversationAudio(); // NEW: Conversation button event listener
                 if (this.elements.geminiApiKeyInput) this.elements.geminiApiKeyInput.oninput = () => this.validateAndSetApiKey();
 
+                // Tabs
                 if (this.elements.tabFinalState) this.elements.tabFinalState.onclick = () => this.activateTab('finalState');
                 if (this.elements.tabTimeEvolution) this.elements.tabTimeEvolution.onclick = () => this.activateTab('timeEvolution');
                 if (this.elements.tabAnalysis) this.elements.tabAnalysis.onclick = () => this.activateTab('analysis');
 
+                // Modals & Links
                 if (this.elements.closeModalButton) this.elements.closeModalButton.onclick = () => this.hideModal('interpretationModal');
                 if (this.elements.closeLegalModalButton) this.elements.closeLegalModalButton.onclick = () => this.hideModal('legalModal');
                 if (this.elements.closeAiInterpretationModal) this.elements.closeAiInterpretationModal.onclick = () => this.hideModal('aiInterpretationModal');
+                if (this.elements.legalLink) this.elements.legalLink.onclick = (e) => { e.preventDefault(); this.showModal('legalModal'); };
                 
                 const setupLink = (linkId, modalId, sectionId) => {
                     const linkElement = document.getElementById(linkId);
@@ -1227,7 +1240,6 @@
 
                 setupLink('getApiKeyLink', 'interpretationModal', 'apiKeyHelpSection');
                 setupLink('acknowledgementsLink', 'interpretationModal', 'acknowledgementsSection');
-                if (this.elements.legalLink) this.elements.legalLink.onclick = (e) => { e.preventDefault(); this.showModal('legalModal'); };
 
 
                 window.onclick = (event) => {
@@ -1242,6 +1254,7 @@
                     }
                 };
 
+                // Presets
                 if (this.elements.presetDiffusion) {
                     this.elements.presetDiffusion.onclick = () => this.applyPreset({
                         name: 'Pure Diffusion', L: 10.0, N: 256, T: 10.0, nu_eff: 0.5, beta_NL: 0.0, gamma_diss: 0.0, init_cond: 'gaussian'
@@ -1263,43 +1276,51 @@
                     });
                 }
 
+                // NEW: Table display mode dropdown
                 if (this.elements.tableDisplayMode) {
                     this.elements.tableDisplayMode.onchange = (event) => {
                         this.currentTableDisplayMode = event.target.value;
+                        // If in playback mode, update table based on current playback snapshot
                         if (this.elements.playbackControls && !this.elements.playbackControls.classList.contains('hidden') && this.simulator) {
                             const currentTime = parseFloat(this.elements.playbackSlider.value);
                             const snapshotIndex = this.findSnapshotIndexForTime(currentTime);
                             this.updateLiveDataTable(this.simulator.snapshots[snapshotIndex]);
                         } else {
-                            this.updateLiveDataTable();
+                            this.updateLiveDataTable(); // Update table content and header with current live data
                         }
                     };
                 }
 
+                // NEW: Toggle Detailed Table button
                 if (this.elements.toggleDetailedTable) {
                     this.elements.toggleDetailedTable.onclick = () => this.toggleDetailedTableVisibility();
                 }
 
+                // NEW: Playback slider event listener
                 if (this.elements.playbackSlider) {
                     this.elements.playbackSlider.oninput = () => this.handlePlaybackScrub();
                 }
 
                 if (this.elements.enableTooltips) {
+                    // Bind the event handler to the dashboard instance
                     this.elements.enableTooltips.onchange = this.handleEnableTooltipsChange.bind(this);
                 }
             }
 
+            // NEW: Separate handler for enableTooltips change event
             handleEnableTooltipsChange(e) {
                 this.tooltipsEnabled = e.target.checked;
                 if (!this.tooltipsEnabled) {
-                    this.handleTooltipHide();
+                    this.handleTooltipHide(); // Hide any active tooltip if disabled
                 }
             }
 
-            async handleTooltipShow(event) {
+            // NEW: Tooltip show handler
+            handleTooltipShow(event) {
                 if (!this.tooltipsEnabled) return;
 
                 const target = event.target;
+                // Check if the target or its parent has a data-tooltip-content attribute
                 let tooltipContent = target.dataset.tooltipContent;
                 let currentElement = target;
                 while (!tooltipContent && currentElement && currentElement !== this.elements.mainContentArea) {
@@ -1313,56 +1334,52 @@
                     const tooltip = this.elements.dynamicTooltip;
                     tooltip.innerHTML = tooltipContent;
                     tooltip.style.display = 'block';
-                    tooltip.style.opacity = '0'; // Keep invisible while positioning
+                    tooltip.classList.add('show');
 
-                    // Re-typeset MathJax for the tooltip content FIRST to ensure correct dimensions
-                    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
-                        await MathJax.typesetPromise([tooltip]); // Await typesetting
-                    }
+                    // Position the tooltip near the cursor
+                    const xOffset = 10; // offset from cursor
+                    const yOffset = 10; // offset from cursor
 
+                    // Get target's position relative to the viewport
                     const targetRect = target.getBoundingClientRect();
-                    const tooltipRect = tooltip.getBoundingClientRect();
+                    
+                    // Calculate tooltip position relative to the viewport
+                    let tooltipX = targetRect.left + (targetRect.width / 2);
+                    let tooltipY = targetRect.top;
 
-                    // Calculate position: center above the target element
-                    let newLeft = targetRect.left + window.scrollX + (targetRect.width / 2) - (tooltipRect.width / 2);
-                    let newTop = targetRect.top + window.scrollY - tooltipRect.height - 8; // 8px above the element
+                    // Adjust for scrolling
+                    tooltip.style.left = `${tooltipX + window.scrollX}px`;
+                    tooltip.style.top = `${tooltipY + window.scrollY}px`;
 
-                    // Adjust if going off screen
-                    if (newLeft < window.scrollX) {
-                        newLeft = window.scrollX + 5; // 5px from left edge
+                    // Re-typeset MathJax for the tooltip content
+                    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+                        MathJax.typesetPromise([tooltip]);
                     }
-                    if (newLeft + tooltipRect.width > window.innerWidth + window.scrollX) {
-                        newLeft = window.innerWidth + window.scrollX - tooltipRect.width - 5; // 5px from right edge
-                    }
-                    if (newTop < window.scrollY) {
-                        // If not enough space above, place below the target
-                        newTop = targetRect.bottom + window.scrollY + 8; // 8px below the element
-                    }
-
-                    tooltip.style.left = `${newLeft}px`;
-                    tooltip.style.top = `${newTop}px`;
-                    tooltip.classList.add('show'); // Fade in
                 }
             }
 
+            // NEW: Tooltip hide handler
             handleTooltipHide() {
                 const tooltip = this.elements.dynamicTooltip;
                 if (tooltip) {
                     tooltip.classList.remove('show');
+                    // Give it a moment to fade out before hiding completely
                     setTimeout(() => {
-                        if (!tooltip.classList.contains('show')) {
+                        if (!tooltip.classList.contains('show')) { // Only hide if not re-shown
                             tooltip.style.display = 'none';
-                            tooltip.innerHTML = '';
+                            tooltip.innerHTML = ''; // Clear content
                         }
                     }, 200);
                 }
             }
 
             applyPreset(presetConfig) {
+                // Stop any running simulation first
                 if (this.isSimulationRunning) {
-                    this.handleRunStop();
+                    this.handleRunStop(); // This will toggle it to stopped
                 }
 
+                // Set parameter values for sliders and inputs
                 this.elements.paramL.value = presetConfig.L;
                 this.elements.inputL.value = presetConfig.L.toFixed(1);
                 
@@ -1383,13 +1400,15 @@
                 
                 this.elements.paramInit.value = presetConfig.init_cond;
 
+                // Update all slider track colors
                 this.updateAllSliderTrackColors();
                 
-                this.currentPresetName = presetConfig.name;
-                this.updateLiveSimulationTitle();
+                this.currentPresetName = presetConfig.name; // Set the preset name
+                this.updateLiveSimulationTitle(); // Update the title immediately
                 
-                this.refreshApplication(true);
-                this.handleRunStop();
+                // Refresh the application with new parameters and start simulation
+                this.refreshApplication(true); // Pass true to keep the preset name
+                this.handleRunStop(); // Start the simulation
             }
 
             initializeCharts() {
@@ -1411,6 +1430,7 @@
                         return;
                     }
 
+                    // Destroy existing chart if it exists
                     if (this[config.chartVar]) {
                         this[config.chartVar].destroy();
                         this[config.chartVar] = null;
@@ -1444,7 +1464,7 @@
                                     title: { display: true, text: (config.id === 'livePlotCanvas') ? 'u(x,t)' : config.title.replace(' Over Time', '') },
                                     min: config.yMin,
                                     max: config.yMax,
-                                    beginAtZero: true
+                                    beginAtZero: true // Keep beginAtZero for mean/energy charts
                                 }
                             },
                             plugins: {
@@ -1472,12 +1492,12 @@
             updateMetricsDisplay(u_array = this.simulator.u, time = this.simulator.timeSteps[this.simulator.timeSteps.length - 1]) {
                 if (!this.simulator) return;
 
-                const currentResults = this.simulator.analyzeResults(u_array);
+                const currentResults = this.simulator.analyzeResults(u_array); // Pass u_array to analyzeResults
 
                 if (this.isSimulationRunning && !this.isSimulationPaused) {
                     this.meanValueHistory.push(currentResults.mean_value);
                     this.energyHistory.push(currentResults.energy);
-                    this.timeLabels.push(time);
+                    this.timeLabels.push(time); // Use actual time for labels
                     
                     this.maxMaxVal = Math.max(this.maxMaxVal, currentResults.max_value);
                     this.minMinVal = Math.min(this.minMinVal, currentResults.min_value);
@@ -1519,6 +1539,7 @@
             }
 
             updateCharts() {
+                // Helper to get max value for Y-axis scaling with padding
                 const getChartYMax = (dataArray) => {
                     if (dataArray.length === 0) return undefined;
                     const maxVal = Math.max(...dataArray);
@@ -1545,10 +1566,10 @@
                 const btnPauseResume = this.elements.btnPauseResume;
                 const btnRefresh = this.elements.btnRefresh;
                 const btnExport = this.elements.btnExport;
-                const btnResults = this.elements.btnResults;
+                const btnResults = this.elements.btnResults; // Updated ID
                 const btnInterpretKids = this.elements.btnInterpretKids;
                 const btnQA = this.elements.btnQA;
-                const btnConversation = this.elements.btnConversation;
+                const btnConversation = this.elements.btnConversation; // NEW
                 const activityIndicator = this.elements.simulationActivityIndicator;
                 const spinnerElement = activityIndicator.querySelector('.spinner');
                 const presetButtons = [
@@ -1557,11 +1578,9 @@
                     this.elements.presetWave,
                     this.elements.presetPattern
                 ];
-                const playbackControls = this.elements.playbackControls;
-                const playbackSlider = this.elements.playbackSlider;
 
                 const setButtonState = (btn, enabled) => {
-                    if (btn) {
+                    if (btn) { // Ensure button exists before trying to set properties
                         btn.disabled = !enabled;
                         btn.classList.toggle('opacity-50', !enabled);
                         btn.classList.toggle('cursor-not-allowed', !enabled);
@@ -1569,90 +1588,84 @@
                 };
 
                 if (this.isSimulationRunning) {
-                    btnRunContent.innerHTML = '<svg class="inline-block w-5 h-5 mr-2 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"></path></svg> Simulation';
+                    // Simulation is actively running
+                    btnRunContent.innerHTML = '<svg class="inline-block w-5 h-5 mr-2 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"></path></svg> Simulation'; // Stop symbol
                     btnRun.classList.replace('bg-indigo-600', 'bg-red-600');
                     btnRun.classList.replace('hover:bg-indigo-700', 'hover:bg-red-700');
                     btnRunContent.classList.add('pulsing-text');
                     btnRun.title = 'Stop Simulation';
-                    setButtonState(btnRun, true);
-                    setButtonState(btnPauseResume, true);
+                    setButtonState(btnRun, true); // Can stop
+                    setButtonState(btnPauseResume, true); // Can pause/resume
                     btnPauseResume.innerHTML = '<svg class="inline-block w-5 h-5 mr-2 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Simulation';
                     btnPauseResume.title = 'Pause Simulation';
                     activityIndicator.style.display = 'flex';
                     spinnerElement.classList.remove('spinner-completed');
-                    setButtonState(btnExport, false);
-                    setButtonState(btnResults, false);
+                    setButtonState(btnExport, false); // Cannot export while running
+                    setButtonState(btnResults, false); // Cannot interpret while running // Updated ID
                     setButtonState(btnInterpretKids, false);
                     setButtonState(btnQA, false);
-                    setButtonState(btnConversation, true);
-                    setButtonState(btnRefresh, false);
-                    presetButtons.forEach(btn => setButtonState(btn, false));
-                    playbackControls.classList.add('playback-disabled'); // Disable playback controls
-                    playbackSlider.disabled = true;
-                    this.hasSimulationData = true;
+                    setButtonState(btnConversation, true); // Conversation button can always be clicked
+                    setButtonState(btnRefresh, false); // Cannot refresh while running
+                    presetButtons.forEach(btn => setButtonState(btn, false)); // Disable all presets
+                    if (this.elements.playbackControls) this.elements.playbackControls.classList.add('hidden'); // Hide playback controls
+                    this.hasSimulationData = true; // Still running, but data is being generated
                 } else if (this.isSimulationPaused) {
-                    setButtonState(btnRun, true);
-                    setButtonState(btnPauseResume, true);
+                    // Simulation is paused
+                    setButtonState(btnRun, true); // Can stop
+                    setButtonState(btnPauseResume, true); // Can resume
                     btnRunContent.classList.remove('pulsing-text');
                     btnPauseResume.innerHTML = '<svg class="inline-block w-5 h-5 mr-2 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197 2.132A1 1 0 0110 13.82V9.18a1 1 0 011.555-.832l3.197 2.132a1 1 0 010 1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Simulation';
                     btnPauseResume.title = 'Resume Simulation';
                     activityIndicator.style.display = 'flex';
                     spinnerElement.classList.remove('spinner-completed');
-                    setButtonState(btnExport, false);
-                    setButtonState(btnResults, false);
+                    setButtonState(btnExport, false); // Cannot export while paused (mid-simulation)
+                    setButtonState(btnResults, false); // Cannot interpret while paused // Updated ID
                     setButtonState(btnInterpretKids, false);
                     setButtonState(btnQA, false);
-                    setButtonState(btnConversation, true);
-                    setButtonState(btnRefresh, false);
-                    presetButtons.forEach(btn => setButtonState(btn, false));
-                    playbackControls.classList.add('playback-disabled'); // Keep disabled while paused
-                    playbackSlider.disabled = true;
-                    this.hasSimulationData = true;
+                    setButtonState(btnConversation, true); // Conversation button can always be clicked
+                    setButtonState(btnRefresh, false); // Cannot refresh while paused
+                    presetButtons.forEach(btn => setButtonState(btn, false)); // Disable all presets
+                    if (this.elements.playbackControls) this.elements.playbackControls.classList.add('hidden'); // Hide playback controls
+                    this.hasSimulationData = true; // Data exists, but simulation is paused
                 } else { // Simulation is stopped or completed
-                    btnRunContent.innerHTML = '<svg class="inline-block w-5 h-5 mr-2 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197 2.132A1 1 0 0110 13.82V9.18a1 1 0 011.555-.832l3.197 2.132a1 1 0 010 1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Simulation';
+                    btnRunContent.innerHTML = '<svg class="inline-block w-5 h-5 mr-2 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197 2.132A1 1 0 0110 13.82V9.18a1 1 0 011.555-.832l3.197 2.132a1 1 0 010 1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Simulation'; // Play symbol
                     btnRun.classList.replace('bg-red-600', 'bg-indigo-600');
                     btnRun.classList.replace('hover:bg-red-700', 'hover:bg-indigo-700');
                     btnRunContent.classList.remove('pulsing-text');
                     btnRun.title = 'Start Simulation';
-                    setButtonState(btnPauseResume, false);
+                    setButtonState(btnPauseResume, false); // Cannot pause/resume if not running
 
                     const hasData = this.simulator && this.simulator.snapshots.length > 1;
                     const canInterpret = hasData && this.geminiApiKey.length > 0;
 
-                    if (this.currentSimStep > 0) {
-                        setButtonState(btnRun, false);
-                        setButtonState(btnExport, hasData);
-                        setButtonState(btnResults, canInterpret);
+                    if (this.currentSimStep > 0) { // Simulation was run and either completed or stopped mid-run
+                        setButtonState(btnRun, false); // Disable run button
+                        setButtonState(btnExport, hasData); // Enable export if data exists
+                        setButtonState(btnResults, canInterpret); // Enable interpret if data and key exist // Updated ID
                         setButtonState(btnInterpretKids, canInterpret);
                         setButtonState(btnQA, canInterpret);
-                        setButtonState(btnConversation, true);
-                        setButtonState(btnRefresh, true);
-                        presetButtons.forEach(btn => setButtonState(btn, false));
+                        setButtonState(btnConversation, true); // Conversation button can always be clicked
+                        setButtonState(btnRefresh, true); // Always enable refresh
+                        presetButtons.forEach(btn => setButtonState(btn, false)); // Disable all presets
                         activityIndicator.style.display = 'flex';
-                        spinnerElement.classList.add('spinner-completed');
-                        this.elements.percentageCounter.textContent = '100%';
-
-                        // Enable playback controls
-                        playbackControls.classList.remove('playback-disabled');
-                        playbackSlider.disabled = false;
-                        this.hasSimulationData = true;
-                    } else {
-                        setButtonState(btnRun, true);
-                        setButtonState(btnExport, false);
-                        setButtonState(btnResults, false);
+                        spinnerElement.classList.add('spinner-completed'); // Show completed spinner
+                        this.elements.percentageCounter.textContent = '100%'; // Ensure 100%
+                        if (this.elements.playbackControls) this.elements.playbackControls.classList.remove('hidden'); // Show playback controls
+                        this.hasSimulationData = true; // Simulation has completed or stopped with data
+                    } else { // Fresh state or after refresh
+                        setButtonState(btnRun, true); // Enable run button
+                        setButtonState(btnExport, false); // Disable export
+                        setButtonState(btnResults, false); // Disable interpret // Updated ID
                         setButtonState(btnInterpretKids, false);
                         setButtonState(btnQA, false);
-                        setButtonState(btnConversation, true);
-                        setButtonState(btnRefresh, true);
-                        presetButtons.forEach(btn => setButtonState(btn, true));
-                        activityIndicator.style.display = 'none';
+                        setButtonState(btnConversation, true); // Conversation button can always be clicked
+                        setButtonState(btnRefresh, true); // Enable refresh
+                        presetButtons.forEach(btn => setButtonState(btn, true)); // Enable all presets
+                        activityIndicator.style.display = 'none'; // Hide activity indicator
                         spinnerElement.classList.remove('spinner-completed');
-                        this.elements.percentageCounter.textContent = '0%';
-                        
-                        // Disable playback controls
-                        playbackControls.classList.add('playback-disabled');
-                        playbackSlider.disabled = true;
-                        this.hasSimulationData = false;
+                        this.elements.percentageCounter.textContent = '0%'; // Reset counter
+                        if (this.elements.playbackControls) this.elements.playbackControls.classList.add('hidden'); // Hide playback controls
+                        this.hasSimulationData = false; // No simulation data yet
                     }
                 }
             }
@@ -1676,24 +1689,24 @@
                 this.isSimulationRunning = true;
                 this.isSimulationPaused = false;
                 this.updateButtonStates();
-                this.updateLiveSimulationTitle();
+                this.updateLiveSimulationTitle(); // Ensure title is set when simulation starts
 
                 this.liveChart.data.labels = this.simulator.x.map(val => val.toFixed(2));
                 this.liveChart.data.datasets[0].data = Array.from(this.simulator.u);
                 this.liveChart.update();
-                this.updateLiveDataTable(this.simulator.u);
+                this.updateLiveDataTable(this.simulator.u); // Initial update for the table
 
                 const n_steps = Math.floor(this.simulator.T / this.simulator.dt);
                 const snapshot_interval = Math.max(1, Math.floor(n_steps / 100));
 
                 for (let i = this.currentSimStep + 1; i <= n_steps; i++) {
-                    if (!this.isSimulationRunning) break;
+                    if (!this.isSimulationRunning) break; // Stop if simulation is stopped
                     if (this.isSimulationPaused) {
                         await new Promise(resolve => {
                             const check = () => !this.isSimulationPaused ? resolve() : requestAnimationFrame(check);
                             check();
                         });
-                        if (!this.isSimulationRunning) break;
+                        if (!this.isSimulationRunning) break; // Check again after unpause
                     }
 
                     this.simulator.step();
@@ -1702,43 +1715,43 @@
                     if (i % snapshot_interval === 0 || i === n_steps) {
                         this.simulator.snapshots.push(Array.from(this.simulator.u));
                         this.simulator.timeSteps.push(i * this.simulator.dt);
-                        this.updateMetricsDisplay(this.simulator.u, i * this.simulator.dt);
+                        this.updateMetricsDisplay(this.simulator.u, i * this.simulator.dt); // Update metrics live
                     }
 
                     const progressPercent = (this.currentSimStep / n_steps) * 100;
                     this.elements.progressBar.style.width = `${progressPercent}%`;
-                    this.elements.percentageCounter.textContent = `${progressPercent.toFixed(0)}%`;
+                    this.elements.percentageCounter.textContent = `${progressPercent.toFixed(0)}%`; // Update percentage counter
                     this.liveChart.data.datasets[0].data = Array.from(this.simulator.u);
                     this.liveChart.update();
-                    this.updateLiveDataTable(this.simulator.u);
+                    this.updateLiveDataTable(this.simulator.u); // Update the table live
                     
-                    await new Promise(resolve => setTimeout(resolve, 0));
+                    await new Promise(resolve => setTimeout(resolve, 0)); // Yield to browser to prevent UI freeze
                 }
 
                 this.isSimulationRunning = false;
                 this.isSimulationPaused = false;
-                this.updateMetricsDisplay(this.simulator.u, this.simulator.T);
+                this.updateMetricsDisplay(this.simulator.u, this.simulator.T); // Ensure final metrics are rendered
                 this.showDetailedResults();
                 this.updateButtonStates();
-                this.updateLiveSimulationTitle();
+                this.updateLiveSimulationTitle(); // Reset title to 'Custom' or default after completion
 
                 if (this.elements.playbackSlider && this.simulator) {
                     this.elements.playbackSlider.max = this.simulator.T;
                     this.elements.playbackSlider.value = this.simulator.T;
                     this.elements.playbackCurrentTime.textContent = `Time: ${this.simulator.T.toFixed(2)}s`;
                     this.elements.playbackTotalTime.textContent = `Total: ${this.simulator.T.toFixed(2)}s`;
-                    this.updateSliderTrackColor(this.elements.playbackSlider);
+                    this.updateSliderTrackColor(this.elements.playbackSlider); // Update track color
                 }
             }
 
             handleRunStop() {
                 if (this.isSimulationRunning) {
-                    this.isSimulationRunning = false;
-                    this.isSimulationPaused = false;
-                    this.hasSimulationData = true;
+                    this.isSimulationRunning = false; // Stop the simulation
+                    this.isSimulationPaused = false; // Ensure not paused if stopped
+                    this.hasSimulationData = true; // Simulation stopped, but data is now available
                 } else {
                     if (this.currentSimStep === 0) {
-                        this.refreshApplication(true);
+                        this.refreshApplication(true); // Pass true to keep the preset name
                     }
                     this.runSimulationLoop();
                 }
@@ -1755,9 +1768,9 @@
             refreshApplication(keepPresetName = false) {
                 this.isSimulationRunning = false;
                 this.isSimulationPaused = false;
-                this.currentSimStep = 0;
+                this.currentSimStep = 0; // Reset simulation step
                 this.elements.progressBar.style.width = '0%';
-                this.elements.percentageCounter.textContent = '0%';
+                this.elements.percentageCounter.textContent = '0%'; // Reset percentage counter
                 
                 if (this.liveChart) { this.liveChart.destroy(); this.liveChart = null; }
                 if (this.meanValChart) { this.meanValChart.destroy(); this.meanValChart = null; }
@@ -1788,8 +1801,7 @@
                 this.activateTab('finalState');
 
                 if (this.elements.playbackControls) {
-                    this.elements.playbackControls.classList.add('playback-disabled'); // Ensure disabled on refresh
-                    this.elements.playbackSlider.disabled = true; // Ensure slider is disabled
+                    this.elements.playbackControls.classList.add('hidden');
                     this.elements.playbackSlider.value = 0;
                     this.elements.playbackCurrentTime.textContent = 'Time: 0.00s';
                     this.elements.playbackTotalTime.textContent = '0.00s';
@@ -1818,7 +1830,7 @@
 
                 if (!this.isSimulationRunning && this.currentSimStep === 0) {
                     subtitleSpan.innerHTML = `<span class="text-red-600-custom">NOT ACTIVE</span>`;
-                } else if (!this.isSimulationRunning && this.currentSimStep > 0 && this.elements.playbackControls && !this.elements.playbackControls.classList.contains('playback-disabled')) {
+                } else if (!this.isSimulationRunning && this.currentSimStep > 0 && this.elements.playbackControls && !this.elements.playbackControls.classList.contains('hidden')) {
                     const currentTime = parseFloat(this.elements.playbackSlider.value).toFixed(2);
                     subtitleSpan.innerHTML = `<span class="text-blue-600">PLAYBACK (t=${currentTime}s)</span>`;
                 }
@@ -1870,8 +1882,8 @@
                 }
 
                 if (!this.isDetailedTableVisible) {
-                    tableBody.innerHTML = '';
-                    valueHeader.innerHTML = 'Value ($u(x,t)$)';
+                    tableBody.innerHTML = ''; // Clear existing rows if hidden
+                    valueHeader.innerHTML = 'Value ($u(x,t)$)'; // Reset header
                     if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
                         MathJax.typesetPromise([valueHeader]);
                     }
@@ -1883,10 +1895,10 @@
                     return;
                 }
 
-                tableBody.innerHTML = '';
+                tableBody.innerHTML = ''; // Clear existing rows
 
                 if (!this.simulator || !u_data) {
-                    valueHeader.innerHTML = 'Value ($u(x,t)$)';
+                    valueHeader.innerHTML = 'Value ($u(x,t)$)'; // Reset header
                     return;
                 }
 
@@ -2167,7 +2179,7 @@
                 `;
 
                 try {
-                    const result = await genAI.generateContent(prompt);
+                    const result = await geminiModel.generateContent(prompt);
                     const text = await result.response.text();
                     this.elements.aiInterpretationContent.innerHTML = `<div class="prose max-w-none">${text.replace(/\n/g, '<br>')}</div>`;
                     if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
@@ -2186,7 +2198,7 @@
                         <span class="spinner w-8 h-8 !border-t-orange-500 !border-gray-200"></span>
                         <span id="aiProgressMessage" class="ml-2 text-gray-600">Generating Q&A pairs...</span>
                     </div>`;
-                this.elements.aiProgressMessage.textContent = "Generating Q&A pairs...";
+                this.elements.aiProgressMessage.textContent = "Generating Q&A pairs..."; // Ensure message is set
 
                 const currentApiKey = this.geminiApiKey;
 
@@ -2201,7 +2213,7 @@
                     return;
                 }
 
-                const genAI = new GoogleGenerativeAI(currentApiKey);
+                const genAI = new GoogleGenerativeAI(currentApiKey); // Use the user-provided API key
                 const geminiModel = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
                 const prompt = `
@@ -2364,7 +2376,7 @@
                             </div>
                             <div>
                                 <p class="text-gray-600" data-tooltip-content="The average value of $u(x,t)$ across the spatial domain at the final time step.">Mean Value ($\\overline{u}$): <span id="finalMetricMeanVal">${this.elements.metricMeanVal_current.textContent}</span></p>
-                                <p class="text-gray-600" data-tooltip-content="Measures the spread or variability of $u(x,t)$ values across the domain at the final time step. Higher values indicate more spatial heterogeneity.">Standard Deviation ($\sigma_u$): <span id="finalMetricStdDev">${this.elements.metricStdDev_current.textContent}</span></p>
+                                <p class="text-gray-600" data-tooltip-content="Measures the spread or variability of $u(x,t)$ values across the domain at the final time step. Higher values indicate more spatial heterogeneity.">Standard Deviation ($\\sigma_u$): <span id="finalMetricStdDev">${this.elements.metricStdDev_current.textContent}</span></p>
                             </div>
                             <div class="col-span-full">
                                 <p class="text-gray-600" data-tooltip-content="Defined as $\\mathcal{E} = \\int_0^L u(x,t)^2 dx$. Represents a form of 'total activity' or 'content' in the system at the final time step.">Energy ($\\mathcal{E}$): <span id="finalMetricEnergy">${this.elements.metricEnergy_current.textContent}</span></p>
@@ -2482,12 +2494,14 @@
             }
         }
 
-        let dashboardInstance;
+        // Initialize the dashboard when the DOM is fully loaded
+        let dashboardInstance; // Declare a global variable for the dashboard instance
         document.addEventListener('DOMContentLoaded', () => {
-            dashboardInstance = new SimulationDashboard();
+            dashboardInstance = new SimulationDashboard(); // Assign the instance to the global variable
             dashboardInstance.activateTab(dashboardInstance.currentActiveTab);
         });
 
+        // Use window.onload to ensure MathJax and all other resources are fully loaded
         window.onload = () => {
             const mainContentArea = document.getElementById('mainContentArea');
             const parameterSection = document.getElementById('parameterSection');
