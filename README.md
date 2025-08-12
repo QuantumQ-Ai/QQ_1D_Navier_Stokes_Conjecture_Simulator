@@ -1,5 +1,7 @@
 # QQ_1D_Navier_Stokes_Conjecture_Simulator
 
+ABOUT: An interactive simulator for a 1D Reaction-Diffusion PDE, designed for conceptual exploration of phenomena like diffusion, non-linear growth, and pattern formation, with AI-powered analysis features.
+
 CRITICAL NOTE FOR RESEARCHERS: This tool simulates a 1D Reaction-Diffusion Partial Differential Equation (PDE). While it demonstrates phenomena analogous to those in fluid dynamics, such as; diffusion (viscosity-like effects) and non-linear interactions, and is fundamentally not a model of the 3D Navier-Stokes equations.
 
 The results from this simulator cannot be used to draw direct conclusions about 3D fluid flow or address the Navier-Stokes existence and smoothness conjecture. Its purpose is for the conceptual exploration of 1D pattern formation, wave propagation, and the interplay between diffusion and reaction terms.
