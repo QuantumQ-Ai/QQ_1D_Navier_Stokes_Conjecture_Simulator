@@ -307,6 +307,30 @@
         #aiAnalysisResult strong {
             color: #4338ca; /* indigo-700 */
         }
+
+        /* Export PNG Button Styles */
+        .export-png-button {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            z-index: 10;
+            background-color: rgba(243, 244, 246, 0.8); /* bg-gray-100 with opacity */
+            border: 1px solid #d1d5db; /* border-gray-300 */
+            border-radius: 9999px; /* rounded-full */
+            padding: 0.375rem; /* p-1.5 */
+            cursor: pointer;
+            transition: all 0.15s ease-in-out;
+            color: #4b5563; /* text-gray-600 */
+        }
+        .export-png-button:hover {
+            background-color: white;
+            color: #1f2937; /* text-gray-800 */
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* shadow-sm */
+        }
+        .export-png-button:disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
     </style>
 <link rel="stylesheet" href="/index.css">
 </head>
@@ -463,6 +487,24 @@
                     </div>
                 </div>
 
+                <!-- AI Parameter Assistant -->
+                <div class="mt-8 border-t border-gray-300 pt-6">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-3 flex items-center">
+                        ✨ AI Parameter Assistant
+                        <span class="ml-2 text-xs font-bold bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full">NEW</span>
+                    </h3>
+                    <p class="text-xs text-gray-500 mb-3">Describe your desired simulation outcome, and the AI will suggest parameter changes.</p>
+                    <div class="flex flex-col gap-2">
+                        <textarea id="aiGoalInput" class="bg-white block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm" rows="3" placeholder="e.g., 'create stable, repeating patterns' or 'make the wave front as steep as possible'"></textarea>
+                        <button id="btnGetAiSuggestions" class="w-full px-4 py-2 bg-purple-600 text-white font-semibold rounded-lg shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition ease-in-out duration-150 h-10 flex items-center justify-center" disabled title="Get AI Suggestions (Requires API Key)">
+                            Get Suggestions
+                        </button>
+                    </div>
+                    <div id="aiSuggestionsContainer" class="mt-4 p-3 bg-white border border-gray-200 rounded-md shadow-inner hidden">
+                        <!-- AI suggestions will be populated here -->
+                    </div>
+                </div>
+
                 <!-- Simulation Controls -->
                 <h3 class="text-lg font-semibold text-gray-700 mt-6 mb-3">Simulation Controls:</h3>
                 <div class="flex flex-col sm:flex-row justify-around gap-4 mb-4">
@@ -529,6 +571,9 @@
 
                 <div id="livePlotContainer" class="relative bg-white rounded-lg p-4 shadow-inner border border-gray-300">
                     <canvas id="livePlotCanvas" class="w-full h-80 sm:h-96 cursor-crosshair"></canvas>
+                    <button id="exportLivePlot" class="export-png-button" disabled title="Export as PNG">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                    </button>
                     <div id="stabilityWarning">
                         <svg class="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                         <p class="font-bold text-lg">Numerical Instability Detected</p>
@@ -553,10 +598,13 @@
                 </div>
 
                 <!-- Term Contributions Plot -->
-                <div id="termContributionsContainer" class="mt-6 bg-white rounded-lg p-4 shadow-inner border border-gray-300">
+                <div id="termContributionsContainer" class="mt-6 bg-white rounded-lg p-4 shadow-inner border border-gray-300 relative">
                     <h3 class="text-lg font-semibold text-gray-700 mb-3 cursor-pointer" data-tooltip-content="<div class='text-left'><p class='font-semibold mb-1'>Term Contributions</p><p class='text-xs text-gray-300'>Visualizes the individual components of the PDE, showing how diffusion, reaction, and their sum contribute to the total change ($du/dt$) at each point in space.</p></div>">Term Contributions</h3>
                     <div class="relative h-80 sm:h-96">
                          <canvas id="termContributionsChartCanvas"></canvas>
+                         <button id="exportTermContributions" class="export-png-button" disabled title="Export as PNG">
+                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                         </button>
                     </div>
                 </div>
             </div>
@@ -604,9 +652,15 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div class="w-full bg-gray-100 rounded-md border border-gray-300 p-2 relative">
                         <canvas id="meanValChartCanvas" class="w-full h-64"></canvas>
+                        <button id="exportMeanVal" class="export-png-button" disabled title="Export as PNG">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                        </button>
                     </div>
                     <div class="w-full bg-gray-100 rounded-md border border-gray-300 p-2 relative">
                         <canvas id="energyChartCanvas" class="w-full h-64"></canvas>
+                        <button id="exportEnergy" class="export-png-button" disabled title="Export as PNG">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                        </button>
                     </div>
                 </div>
 
@@ -634,7 +688,15 @@
                         <audio id="navierStokesAudio" src="https://quantumq-ai.github.io/QQ_1D_Navier_Stokes_Conjecture_Simulator/NavierStokesConversation.mp3" preload="auto"></audio>
                     </div>
                     <div class="mt-4 w-full max-w-md text-center">
-                         <p class="text-xs text-gray-600 mt-2">AI FEATURES REQUIRE INTERNET CONNECTION AND A VALID API KEY CONFIGURED IN THE ENVIRONMENT.</p>
+                        <div class="mb-4">
+                            <label for="apiKeyInput" class="block text-sm font-medium text-gray-700 mb-1">ENTER YOUR GEMINI API KEY:</label>
+                            <div class="flex items-center gap-x-2">
+                                <input type="password" id="apiKeyInput" class="flex-grow bg-white block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm font-mono" placeholder="Paste your API key here">
+                                <button id="saveApiKeyButton" class="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 h-10">Save</button>
+                            </div>
+                            <p id="apiKeyStatus" class="text-xs text-gray-500 mt-1 h-4"></p>
+                        </div>
+                         <p class="text-xs text-gray-600 mt-2 font-bold">AI FEATURES REQUIRE A VALID GEMINI API KEY.</p>
                          <a href="#" id="getApiKeyLink" class="font-bold text-blue-600 hover:text-blue-800 text-xs no-underline mt-2 inline-block cursor-pointer">HOW TO ACQUIRE A GEMINI KEY</a>
                     </div>
                 </div>
@@ -649,7 +711,7 @@
             <div id="finalStateSummary" class="mb-6 bg-white p-4 rounded-lg shadow-inner border border-gray-300 hidden">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-xl font-semibold text-gray-700">Final State Summary</h3>
-                    <button id="btnAiAnalysis" class="px-4 py-2 bg-purple-600 text-white font-semibold rounded-lg shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition ease-in-out duration-150 h-10 flex items-center justify-center cursor-pointer" title="Generate AI-powered analysis of the final state">
+                    <button id="btnAiAnalysis" class="px-4 py-2 bg-purple-600 text-white font-semibold rounded-lg shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition ease-in-out duration-150 h-10 flex items-center justify-center cursor-pointer" disabled title="Generate AI-powered analysis of the final state">
                         <span class="flex items-center justify-center">
                             ✨ Generate AI Analysis
                         </span>
@@ -704,12 +766,21 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                         <div class="w-full bg-gray-100 rounded-md border border-gray-300 p-2 relative cursor-pointer" data-tooltip-content="<div class='text-left'><p class='font-semibold mb-1'>Value Distribution ($u$)</p><p class='text-xs mb-2 text-gray-300'>This histogram shows the distribution of the field value $u$ across all points in the final state.</p></div>">
                             <canvas id="valueDistChartCanvas" class="w-full h-[30rem]"></canvas>
+                            <button id="exportValueDist" class="export-png-button" disabled title="Export as PNG">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                            </button>
                         </div>
                         <div class="w-full bg-gray-100 rounded-md border border-gray-300 p-2 relative cursor-pointer" data-tooltip-content="<div class='text-left'><p class='font-semibold mb-1'>Gradient Distribution ($\partial u / \partial x$)</p><p class='text-xs mb-2 text-gray-300'>Shows the distribution of the first spatial derivative, indicating the prevalence of steep or flat regions.</p></div>">
                             <canvas id="gradientDistChartCanvas" class="w-full h-[30rem]"></canvas>
+                            <button id="exportGradientDist" class="export-png-button" disabled title="Export as PNG">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                            </button>
                         </div>
                         <div class="w-full bg-gray-100 rounded-md border border-gray-300 p-2 relative cursor-pointer" data-tooltip-content="<div class='text-left'><p class='font-semibold mb-1'>Curvature Distribution ($\partial^2 u / \partial x^2$)</p><p class='text-xs mb-2 text-gray-300'>Shows the distribution of the second spatial derivative, related to the diffusive forces in the system.</p></div>">
                             <canvas id="curvatureDistChartCanvas" class="w-full h-[30rem]"></canvas>
+                            <button id="exportCurvatureDist" class="export-png-button" disabled title="Export as PNG">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -719,11 +790,17 @@
                     <p class="text-xs text-gray-600 mb-4">This log-log plot shows how the system's energy is distributed across different spatial frequencies (wavenumbers, k), updating in real-time.</p>
                     <div class="w-full bg-gray-100 rounded-md border border-gray-300 p-2 relative h-80 mb-6">
                         <canvas id="powerSpectrumChartCanvas"></canvas>
+                        <button id="exportPowerSpectrum" class="export-png-button" disabled title="Export as PNG">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                        </button>
                     </div>
                     <h3 class="text-lg font-semibold text-gray-700 mb-2">Energy Spectrogram (k-t Diagram)</h3>
                     <p class="text-xs text-gray-600 mb-4">This plot shows the entire history of the energy spectrum. The horizontal axis is wavenumber (k), the vertical axis is time (t, flowing downwards), and color intensity represents energy.</p>
                     <div class="w-full bg-gray-100 rounded-md border border-gray-300 p-2 relative h-80">
                         <canvas id="spectrumHistoryChartCanvas"></canvas>
+                        <button id="exportSpectrumHistory" class="export-png-button" disabled title="Export as PNG">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                        </button>
                     </div>
                 </div>
 
@@ -732,6 +809,9 @@
                     <p class="text-xs text-gray-600 mb-4">This plot shows the relationship between the field value ($u$) and its gradient ($\partial u / \partial x$), updating in real-time. Closed loops, points, or strange attractors in this space can reveal the underlying dynamics of the system.</p>
                     <div class="w-full bg-gray-100 rounded-md border border-gray-300 p-2 relative h-96">
                         <canvas id="phaseSpaceChartCanvas"></canvas>
+                        <button id="exportPhaseSpace" class="export-png-button" disabled title="Export as PNG">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                        </button>
                     </div>
                 </div>
                 
@@ -740,6 +820,9 @@
                     <p class="text-xs text-gray-600 mb-4">This plot shows the entire simulation history at a glance. The horizontal axis is space ($x$), and the vertical axis is time ($t$, flowing downwards). The color at each point represents the value of $u(x,t)$, providing a complete map of how patterns form and evolve.</p>
                     <div class="w-full bg-gray-100 rounded-md border border-gray-300 p-2 relative h-96">
                         <canvas id="timeSpaceChartCanvas"></canvas>
+                        <button id="exportTimeSpace" class="export-png-button" disabled title="Export as PNG">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                        </button>
                     </div>
                 </div>
 
@@ -749,9 +832,15 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="w-full bg-gray-100 rounded-md border border-gray-300 p-2 relative h-96">
                             <canvas id="spatialCorrelationChartCanvas"></canvas>
+                            <button id="exportSpatialCorrelation" class="export-png-button" disabled title="Export as PNG">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                            </button>
                         </div>
                         <div class="w-full bg-gray-100 rounded-md border border-gray-300 p-2 relative h-96">
                             <canvas id="temporalCorrelationChartCanvas"></canvas>
+                            <button id="exportTemporalCorrelation" class="export-png-button" disabled title="Export as PNG">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -761,6 +850,9 @@
                     <p class="text-xs text-gray-600 mb-4">This histogram shows the distribution of time intervals ($\Delta t$) between consecutive snapshots saved during the simulation. It helps visualize if the sampling rate was uniform.</p>
                     <div class="w-full bg-gray-100 rounded-md border border-gray-300 p-2 relative h-96">
                         <canvas id="temporalSamplingChartCanvas"></canvas>
+                        <button id="exportTemporalSampling" class="export-png-button" disabled title="Export as PNG">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                        </button>
                     </div>
                 </div>
 
@@ -905,13 +997,13 @@
             <div id="apiKeyHelpSection">
                 <h3 class="text-xl font-semibold text-gray-700 mb-2 mt-6">7. Acquiring a Gemini API Key</h3>
                 <p class="mb-4 text-gray-700">
-                    To enable the AI-powered interpretation features (Results, Ask Einstein, Q&A), you need a Gemini API key. This key must be provided in the application's environment. You can get a free key from Google AI Studio.
+                    To enable the AI-powered interpretation features (Results, Ask Einstein, Q&A), you need a Gemini API key. You can get a free key from Google AI Studio.
                 </p>
                 <ol class="list-decimal list-inside ml-4 text-gray-700 space-y-2">
                     <li>Visit the Google AI Studio website: <a href="https://aistudio.google.com/" target="_blank" class="text-blue-600 hover:underline">https://aistudio.google.com/</a></li>
                     <li>Sign in with your Google account.</li>
                     <li>Click the "Get API key" button and create a new API key.</li>
-                    <li>Set this key as the `API_KEY` environment variable where you are running this application.</li>
+                    <li>Copy the key and paste it into the input field in the "Simulation Metrics" section of this application.</li>
                 </ol>
             </div>
 
@@ -1002,7 +1094,7 @@
     }
     </script>
     <script type="module">
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
 
 // ==============================================================================
 // SIMULATION WORKER SCRIPT (as a string to be blob-ified)
@@ -1419,6 +1511,7 @@ self.onmessage = (e) => {
 class SimulationDashboard {
     constructor() {
         this.worker = null;
+        this.apiKey = null;
         this.liveChart = null;
         this.meanValChart = null;
         this.energyChart = null;
@@ -1436,6 +1529,7 @@ class SimulationDashboard {
         };
         
         this.keyStatistics = {};
+        this.aiSuggestions = null;
 
         this.meanValueHistory = [];
         this.energyHistory = [];
@@ -1470,6 +1564,7 @@ class SimulationDashboard {
         this._boundHandleLivePlotLeave = this.handleLivePlotLeave.bind(this);
 
         this.setupEventListeners();
+        this.loadApiKeyFromStorage();
         this.updateAllSliderTrackColors();
         this.initializeCharts();
         this.refreshApplication();
@@ -1497,7 +1592,11 @@ class SimulationDashboard {
             'powerSpectrumChartCanvas', 'phaseSpaceChartCanvas', 'timeSpaceChartCanvas', 'spatialCorrelationChartCanvas',
             'temporalCorrelationChartCanvas', 'temporalSamplingChartCanvas', 'finalStateSummary', 'btnAiAnalysis',
             'aiAnalysisResult', 'statWavenumber', 'statWavelength', 'statCorrLength', 'statCorrTime', 'statSkewness', 'statKurtosis',
-            'simulationSpeed', 'btnSaveState', 'btnLoadState', 'loadStateInput', 'spectrumHistoryChartCanvas'
+            'simulationSpeed', 'btnSaveState', 'btnLoadState', 'loadStateInput', 'spectrumHistoryChartCanvas',
+            'apiKeyInput', 'saveApiKeyButton', 'apiKeyStatus', 'exportLivePlot', 'exportTermContributions', 'exportMeanVal', 
+            'exportEnergy', 'exportValueDist', 'exportGradientDist', 'exportCurvatureDist', 'exportPowerSpectrum', 
+            'exportSpectrumHistory', 'exportPhaseSpace', 'exportTimeSpace', 'exportSpatialCorrelation', 
+            'exportTemporalCorrelation', 'exportTemporalSampling', 'aiGoalInput', 'btnGetAiSuggestions', 'aiSuggestionsContainer'
         ];
         const elements = {};
         ids.forEach(id => elements[id] = document.getElementById(id));
@@ -1592,6 +1691,62 @@ class SimulationDashboard {
         this._setupTabControls();
         this._setupPlaybackControls();
         this._setupTooltipAndHoverHandlers();
+        this._setupApiKeyControls();
+    }
+
+    _setupApiKeyControls() {
+        this.elements.saveApiKeyButton.onclick = () => this.saveApiKey();
+        this.elements.apiKeyInput.onkeydown = (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                this.saveApiKey();
+            }
+        };
+    }
+
+    saveApiKey() {
+        const key = this.elements.apiKeyInput.value.trim();
+        const statusEl = this.elements.apiKeyStatus;
+        if (key) {
+            this.apiKey = key;
+            try {
+                localStorage.setItem('geminiApiKey', key);
+                statusEl.textContent = 'API Key saved successfully!';
+                statusEl.className = 'text-xs text-green-600 mt-1 h-4';
+            } catch (e) {
+                console.error("Could not save API key to localStorage:", e);
+                statusEl.textContent = 'Could not save key (localStorage disabled?).';
+                statusEl.className = 'text-xs text-yellow-600 mt-1 h-4';
+            }
+        } else {
+            this.apiKey = null;
+            try {
+                localStorage.removeItem('geminiApiKey');
+            } catch (e) {}
+            statusEl.textContent = 'API Key cleared.';
+            statusEl.className = 'text-xs text-gray-500 mt-1 h-4';
+        }
+        this.updateButtonStates();
+        setTimeout(() => { if(statusEl) statusEl.textContent = ''; }, 3000);
+    }
+
+    loadApiKeyFromStorage() {
+        try {
+            const storedKey = localStorage.getItem('geminiApiKey');
+            if (storedKey) {
+                this.elements.apiKeyInput.value = storedKey;
+                this.apiKey = storedKey;
+                const statusEl = this.elements.apiKeyStatus;
+                if (statusEl) {
+                    statusEl.textContent = 'Loaded API Key from storage.';
+                    statusEl.className = 'text-xs text-gray-500 mt-1 h-4';
+                    setTimeout(() => { statusEl.textContent = ''; }, 3000);
+                }
+            }
+        } catch (e) {
+            console.warn("Could not load API key from localStorage:", e);
+        }
+        this.updateButtonStates();
     }
 
     _setupParameterControls() {
@@ -1635,6 +1790,23 @@ class SimulationDashboard {
         this.elements.btnSaveState.onclick = () => this.saveState();
         this.elements.btnLoadState.onclick = () => this.elements.loadStateInput.click();
         this.elements.loadStateInput.onchange = (e) => this.loadState(e);
+        this.elements.btnGetAiSuggestions.onclick = () => this.getAiParameterSuggestions();
+
+        // Export PNG button listeners
+        this.elements.exportLivePlot.onclick = () => this.exportCanvasAsPNG('livePlotCanvas', 'live-plot.png');
+        this.elements.exportTermContributions.onclick = () => this.exportCanvasAsPNG('termContributionsChartCanvas', 'term-contributions.png');
+        this.elements.exportMeanVal.onclick = () => this.exportCanvasAsPNG('meanValChartCanvas', 'mean-value-history.png');
+        this.elements.exportEnergy.onclick = () => this.exportCanvasAsPNG('energyChartCanvas', 'energy-history.png');
+        this.elements.exportValueDist.onclick = () => this.exportCanvasAsPNG('valueDistChartCanvas', 'value-distribution.png');
+        this.elements.exportGradientDist.onclick = () => this.exportCanvasAsPNG('gradientDistChartCanvas', 'gradient-distribution.png');
+        this.elements.exportCurvatureDist.onclick = () => this.exportCanvasAsPNG('curvatureDistChartCanvas', 'curvature-distribution.png');
+        this.elements.exportPowerSpectrum.onclick = () => this.exportCanvasAsPNG('powerSpectrumChartCanvas', 'power-spectrum.png');
+        this.elements.exportSpectrumHistory.onclick = () => this.exportCanvasAsPNG('spectrumHistoryChartCanvas', 'spectrum-history.png');
+        this.elements.exportPhaseSpace.onclick = () => this.exportCanvasAsPNG('phaseSpaceChartCanvas', 'phase-space.png');
+        this.elements.exportTimeSpace.onclick = () => this.exportCanvasAsPNG('timeSpaceChartCanvas', 'time-space-plot.png');
+        this.elements.exportSpatialCorrelation.onclick = () => this.exportCanvasAsPNG('spatialCorrelationChartCanvas', 'spatial-correlation.png');
+        this.elements.exportTemporalCorrelation.onclick = () => this.exportCanvasAsPNG('temporalCorrelationChartCanvas', 'temporal-correlation.png');
+        this.elements.exportTemporalSampling.onclick = () => this.exportCanvasAsPNG('temporalSamplingChartCanvas', 'temporal-sampling.png');
     }
 
     _setupPresetButtons() {
@@ -1958,7 +2130,7 @@ class SimulationDashboard {
     }
 
     canInterpret() {
-        return this.isSimulationFinished && (typeof process !== 'undefined' && process.env.API_KEY) && !this.simulatorProxy.isUnstable;
+        return this.isSimulationFinished && this.apiKey && !this.simulatorProxy.isUnstable;
     }
 
     updateButtonStates() {
@@ -2002,7 +2174,18 @@ class SimulationDashboard {
         setButtonState(this.elements.btnResults, canInterpret);
         setButtonState(this.elements.btnInterpretKids, canInterpret);
         setButtonState(this.elements.btnQA, canInterpret);
+        setButtonState(this.elements.btnAiAnalysis, canInterpret);
         setButtonState(this.elements.btnReplay, this.isSimulationFinished && !this.simulatorProxy.isUnstable);
+        setButtonState(this.elements.btnGetAiSuggestions, this.apiKey && !this.isSimulationRunning);
+
+        const enableExports = this.isSimulationFinished && !this.simulatorProxy.isUnstable;
+        const exportButtons = [
+            'exportLivePlot', 'exportTermContributions', 'exportMeanVal', 'exportEnergy',
+            'exportValueDist', 'exportGradientDist', 'exportCurvatureDist',
+            'exportPowerSpectrum', 'exportSpectrumHistory', 'exportPhaseSpace', 'exportTimeSpace',
+            'exportSpatialCorrelation', 'exportTemporalCorrelation', 'exportTemporalSampling'
+        ];
+        exportButtons.forEach(id => setButtonState(this.elements[id], enableExports));
     
         this.updateLiveSimulationTitle();
         this.elements.btnRun.classList.toggle('bg-red-600', this.isSimulationRunning); this.elements.btnRun.classList.toggle('hover:bg-red-700', this.isSimulationRunning);
@@ -2016,7 +2199,6 @@ class SimulationDashboard {
         this.isSimulationRunning = false;
         this.isSimulationFinished = true;
         if (this.replayAnimationTimer) this.toggleReplayAnimation();
-        this.updateButtonStates();
     
         setTimeout(() => {
             if (this.simulatorProxy.isUnstable) {
@@ -2035,6 +2217,7 @@ class SimulationDashboard {
                 const lastSnapshot = this.simulatorProxy.snapshots.slice(-1)[0];
                 if(lastSnapshot) this.updateTermContributionsChart(lastSnapshot);
             }
+            this.updateButtonStates();
         }, 10);
     }
 
@@ -2099,6 +2282,7 @@ class SimulationDashboard {
         this.elements.stabilityWarning.style.display = 'none';
         this.elements.finalStateSummary.classList.add('hidden');
         this.elements.aiAnalysisResult.classList.add('hidden');
+        this.elements.aiSuggestionsContainer.classList.add('hidden');
         
         this.resetMetricsDisplay();
         
@@ -2327,7 +2511,7 @@ class SimulationDashboard {
         const contentDiv = this.elements.aiInterpretationContent;
         contentDiv.innerHTML = `<div class="flex justify-center items-center py-8"><span class="spinner w-8 h-8 !border-t-purple-500 !border-gray-200"></span><span id="aiProgressMessage" class="ml-2 text-gray-600">Generating...</span></div>`;
         
-        const aiButtons = [this.elements.btnResults, this.elements.btnInterpretKids, this.elements.btnQA];
+        const aiButtons = [this.elements.btnResults, this.elements.btnInterpretKids, this.elements.btnQA, this.elements.btnAiAnalysis];
         const originalButtonContent = aiButtons.map(btn => btn.innerHTML);
         aiButtons.forEach(btn => {
             btn.innerHTML = `<span class="spinner w-5 h-5 !border-white !border-t-transparent"></span>`;
@@ -2335,15 +2519,15 @@ class SimulationDashboard {
         });
 
         try {
-            if (typeof process === 'undefined' || !process.env.API_KEY) {
-                throw new Error("Gemini API key is not configured in the environment.");
+            if (!this.apiKey) {
+                throw new Error("Gemini API key is not provided. Please enter your key.");
             }
             if (!this.isSimulationFinished) {
                 contentDiv.innerHTML = `<p>Please run a simulation to completion.</p>`; 
                 return;
             }
 
-            const ai = new GoogleGenAI({apiKey: process.env.API_KEY});
+            const ai = new GoogleGenAI({apiKey: this.apiKey});
             
             const config = isJson ? { responseMimeType: "application/json" } : {};
             const response = await ai.models.generateContent({
@@ -2788,6 +2972,29 @@ class SimulationDashboard {
         document.body.removeChild(link);
     }
     
+    exportCanvasAsPNG(canvasId, filename) {
+        const canvas = this.elements[canvasId];
+        if (!canvas) {
+            console.error(`Canvas with id ${canvasId} not found for export.`);
+            return;
+        }
+        const link = document.createElement('a');
+        link.download = filename;
+        // Setting background color to white for transparent canvases
+        const context = canvas.getContext('2d');
+        const compositeCanvas = document.createElement('canvas');
+        compositeCanvas.width = canvas.width;
+        compositeCanvas.height = canvas.height;
+        const compositeCtx = compositeCanvas.getContext('2d');
+        compositeCtx.fillStyle = 'white';
+        compositeCtx.fillRect(0, 0, canvas.width, canvas.height);
+        compositeCtx.drawImage(canvas, 0, 0);
+        link.href = compositeCanvas.toDataURL('image/png').replace("image/png", "image/octet-stream");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
     calculateKeyStatistics(final_u, spectrum, correlations) {
         this.keyStatistics = {}; // Reset
         if (!final_u) return;
@@ -2826,11 +3033,6 @@ class SimulationDashboard {
         this.elements.statCorrTime.textContent = format(this.keyStatistics.corrTime);
         this.elements.statSkewness.textContent = format(this.keyStatistics.skewness);
         this.elements.statKurtosis.textContent = format(this.keyStatistics.kurtosis);
-        
-        const canAnalyze = this.canInterpret();
-        this.elements.btnAiAnalysis.disabled = !canAnalyze;
-        this.elements.btnAiAnalysis.classList.toggle('opacity-50', !canAnalyze);
-        this.elements.btnAiAnalysis.classList.toggle('cursor-not-allowed', !canAnalyze);
     }
 
     calculateSkewness(dataArray) {
@@ -2885,10 +3087,10 @@ class SimulationDashboard {
             5.  **Conclusion:** Synthesize the above points into a concluding paragraph about the nature of the simulated phenomenon. Relate it back to the interplay of the simulation parameters (diffusion, reaction, damping).`;
 
         try {
-            if (typeof process === 'undefined' || !process.env.API_KEY) {
-                throw new Error("Gemini API key is not configured in the environment.");
+            if (!this.apiKey) {
+                throw new Error("Gemini API key is not provided. Please enter your key.");
             }
-            const ai = new GoogleGenAI({apiKey: process.env.API_KEY});
+            const ai = new GoogleGenAI({apiKey: this.apiKey});
             const response = await ai.models.generateContent({ model: "gemini-2.5-flash", contents: prompt });
             
             let html = response.text;
@@ -2904,6 +3106,166 @@ class SimulationDashboard {
             this.updateButtonStates();
         }
     }
+
+    async getAiParameterSuggestions() {
+        const goal = this.elements.aiGoalInput.value;
+        if (!goal.trim()) {
+            alert("Please describe your desired outcome in the text box.");
+            return;
+        }
+
+        const btn = this.elements.btnGetAiSuggestions;
+        const originalContent = btn.innerHTML;
+        btn.innerHTML = `<span class="spinner w-5 h-5 !border-white !border-t-transparent mr-2"></span> Thinking...`;
+        btn.disabled = true;
+        
+        const container = this.elements.aiSuggestionsContainer;
+        container.innerHTML = `<div class="flex items-center text-sm text-gray-600"><span class="spinner w-4 h-4 !border-t-purple-500 !border-gray-200 mr-2"></span>The AI is analyzing the parameters...</div>`;
+        container.classList.remove('hidden');
+
+        try {
+            if (!this.apiKey) throw new Error("API key not set.");
+            const ai = new GoogleGenAI({ apiKey: this.apiKey });
+            const currentParams = this.getCurrentParams();
+            const prompt = `
+                You are an expert physicist assisting with a 1D Reaction-Diffusion PDE simulator.
+                The governing equation is: ∂u/∂t = ν_eff * ∂²u/∂x² + β_NL * u(1-u) - γ_diss * u³.
+                - ν_eff (diffusion coefficient): Controls smoothing/viscosity.
+                - β_NL (non-linear growth): Controls local growth.
+                - γ_diss (cubic damping): Controls dissipation/stabilization.
+                - dt (time step): Controls numerical accuracy and stability. A smaller dt is more stable.
+                
+                The user's desired outcome is: "${goal}"
+
+                The current parameters are:
+                - ν_eff: ${currentParams.nu_eff}
+                - β_NL: ${currentParams.beta_NL}
+                - γ_diss: ${currentParams.gamma_diss}
+                - dt: ${currentParams.dt}
+
+                Your task is to suggest adjustments ONLY to ν_eff, β_NL, γ_diss, and dt to help achieve the user's goal.
+                Provide your response in the specified JSON format.
+            `;
+            
+            const responseSchema = {
+                type: Type.OBJECT,
+                properties: {
+                    summary: {
+                        type: Type.STRING,
+                        description: "A brief, high-level summary of the suggested strategy."
+                    },
+                    suggestions: {
+                        type: Type.ARRAY,
+                        items: {
+                            type: Type.OBJECT,
+                            properties: {
+                                parameter: { type: Type.STRING, description: "The parameter to change ('nu_eff', 'beta_NL', 'gamma_diss', or 'dt')." },
+                                suggestedValue: { type: Type.NUMBER, description: "The new suggested value for the parameter." },
+                                reasoning: { type: Type.STRING, description: "A short explanation for why this change will help achieve the user's goal." }
+                            },
+                            required: ["parameter", "suggestedValue", "reasoning"]
+                        }
+                    }
+                },
+                required: ["summary", "suggestions"]
+            };
+
+            const response = await ai.models.generateContent({
+                model: 'gemini-2.5-flash',
+                contents: prompt,
+                config: {
+                    responseMimeType: "application/json",
+                    responseSchema: responseSchema
+                },
+            });
+            const jsonText = response.text.trim();
+            const result = JSON.parse(jsonText);
+            this.aiSuggestions = result.suggestions;
+            this.displayAiSuggestions(result);
+
+        } catch (error) {
+            console.error("AI Suggestion Error:", error);
+            container.innerHTML = `<p class="text-sm text-red-600">Error: ${error.message}</p>`;
+        } finally {
+            btn.innerHTML = originalContent;
+            this.updateButtonStates();
+        }
+    }
+
+    displayAiSuggestions(result) {
+        const container = this.elements.aiSuggestionsContainer;
+        if (!result || !result.suggestions) {
+            container.innerHTML = `<p class="text-sm text-gray-600">The AI did not provide any suggestions.</p>`;
+            return;
+        }
+
+        let html = `<p class="text-sm font-semibold text-gray-800 mb-2">Strategy: <span class="font-normal">${result.summary}</span></p>`;
+        html += `<div class="space-y-3 mt-3">`;
+
+        const paramMap = {
+            'nu_eff': { name: 'Diff. Coefficient (ν_eff)', input: this.elements.inputAlpha },
+            'beta_NL': { name: 'Non-linear Growth (β_NL)', input: this.elements.inputBeta },
+            'gamma_diss': { name: 'Cubic Damping (γ_diss)', input: this.elements.inputGamma },
+            'dt': { name: 'Time Step (dt)', input: this.elements.inputDt }
+        };
+
+        result.suggestions.forEach(sugg => {
+            const paramInfo = paramMap[sugg.parameter];
+            if (!paramInfo) return;
+            const currentValue = parseFloat(paramInfo.input.value);
+            const suggestedValue = sugg.parameter === 'dt' ? sugg.suggestedValue.toExponential(2) : sugg.suggestedValue.toFixed(2);
+            html += `
+                <div class="text-xs border-t border-gray-200 pt-2">
+                    <p class="font-bold text-gray-700">${paramInfo.name}:</p>
+                    <p class="ml-2">Current: ${paramInfo.input.value} &rarr; <strong class="text-purple-700">Suggested: ${suggestedValue}</strong></p>
+                    <p class="ml-2 italic text-gray-500">Reason: ${sugg.reasoning}</p>
+                </div>
+            `;
+        });
+        html += `</div>`;
+        html += `<button id="btnApplyAiSuggestions" class="w-full mt-4 px-3 py-1.5 bg-green-600 text-white text-sm font-semibold rounded-md shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150">Apply Suggestions</button>`;
+        container.innerHTML = html;
+        document.getElementById('btnApplyAiSuggestions').onclick = () => this.applyAiSuggestions();
+    }
+
+    applyAiSuggestions() {
+        if (!this.aiSuggestions) return;
+
+        const paramMap = {
+            'nu_eff': { slider: this.elements.paramAlpha, input: this.elements.inputAlpha, fixed: 2 },
+            'beta_NL': { slider: this.elements.paramBeta, input: this.elements.inputBeta, fixed: 2 },
+            'gamma_diss': { slider: this.elements.paramGamma, input: this.elements.inputGamma, fixed: 2 },
+            'dt': { slider: this.elements.paramDt, input: this.elements.inputDt, isLog: true }
+        };
+
+        this.aiSuggestions.forEach(sugg => {
+            const controls = paramMap[sugg.parameter];
+            if (!controls) return;
+
+            const min = parseFloat(controls.slider.min);
+            const max = parseFloat(controls.slider.max);
+            let value = sugg.suggestedValue;
+
+            if (controls.isLog) {
+                const logVal = Math.log10(value);
+                const clampedLogVal = Math.max(min, Math.min(max, logVal));
+                controls.slider.value = clampedLogVal;
+                controls.input.value = Math.pow(10, clampedLogVal).toExponential(2);
+            } else {
+                const clampedVal = Math.max(min, Math.min(max, value));
+                controls.slider.value = clampedVal;
+                controls.input.value = clampedVal.toFixed(controls.fixed);
+            }
+        });
+        
+        this.updateAllSliderTrackColors();
+        this.updateStabilityIndicator();
+        this.elements.aiSuggestionsContainer.classList.add('hidden');
+        this.currentPresetName = "AI Suggested";
+        this.updateParameterStates();
+        this.refreshApplication(true);
+    }
+
 
     saveState() {
         const state = {
