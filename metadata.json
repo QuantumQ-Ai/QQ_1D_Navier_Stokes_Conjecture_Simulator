@@ -1,5 +1,6 @@
 {
-  "name": "1D Fluid Dynamics Analogue Simulator",
+  "name": "v42 1D Fluid Dynamics Analogue Simulator (Working)",
   "description": "An interactive simulator for a 1D Reaction-Diffusion PDE, designed for conceptual exploration of phenomena like diffusion, non-linear growth, and pattern formation, with AI-powered analysis features.",
-  "requestFramePermissions": []
+  "requestFramePermissions": [],
+  "prompt": ""
 }
